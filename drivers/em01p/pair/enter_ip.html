@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 32px 24px 24px;
+    }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 0 0 8px;
+      text-align: center;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 0.88rem;
+      text-align: center;
+      margin: 0 0 28px;
+      line-height: 1.5;
+    }
+    label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 6px;
+      display: block;
+      color: #444;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #d0d0d0;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 16px;
+    }
+    input[type="text"]:focus { border-color: #007aff; }
+    button {
+      width: 100%;
+      padding: 13px;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.15s;
+    }
+    button:disabled { opacity: 0.45; cursor: default; }
+    #error  { color: #cc0000; font-size: 0.85rem; margin-top: 10px; min-height: 18px; text-align: center; }
+    #status { color: #555;    font-size: 0.85rem; margin-top: 10px; min-height: 18px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>Add Refoss EM01P</h2>
+  <p class="subtitle">Enter the local IP address of your Refoss EM01P device.<br/>
+     You can find it in your router's DHCP client list or the Refoss app.</p>
+
+  <label for="ip">IP Address</label>
+  <input type="text" id="ip" placeholder="e.g. 192.168.1.102" autocomplete="off" />
+
+  <label for="devname">Device Name <span style="font-weight:400;color:#888;">(optional)</span></label>
+  <input type="text" id="devname" placeholder="e.g. Garage Monitor" />
+
+  <button id="btn" onclick="connect()">Connect</button>
+  <div id="error"></div>
+  <div id="status"></div>
+
+  <script>
+    function connect() {
+      const ip      = document.getElementById('ip').value.trim();
+      const name    = document.getElementById('devname').value.trim();
+      const errorEl = document.getElementById('error');
+      const statusEl= document.getElementById('status');
+      const btn     = document.getElementById('btn');
+
+      errorEl.textContent = '';
+      statusEl.textContent = '';
+
+      if (!ip || !/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
+        errorEl.textContent = 'Please enter a valid IP address (e.g. 192.168.1.102)';
+        return;
+      }
+
+      btn.disabled = true;
+      statusEl.textContent = 'Connecting to device\u2026';
+
+      Homey.emit('validate_ip', { ip_address: ip, device_name: name || null })
+        .then(() => {
+          statusEl.textContent = 'Connected! Adding device\u2026';
+          Homey.nextView();
+        })
+        .catch((err) => {
+          btn.disabled = false;
+          statusEl.textContent = '';
+          errorEl.textContent = err.message || 'Could not connect to device.';
+        });
+    }
+
+    document.getElementById('ip').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('devname').focus();
+    });
+    document.getElementById('devname').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') connect();
+    });
+  </script>
+</body>
+</html>

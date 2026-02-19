@@ -1,0 +1,31 @@
+{
+  "id": "measure_power_above",
+  "title": {
+    "en": "Power rises above"
+  },
+  "titleFormatted": {
+    "en": "Power rises above [[threshold]] W"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "min": 0,
+      "step": 1,
+      "placeholder": { "en": "Watts" }
+    }
+  ],
+  "tokens": [
+    {
+      "name": "power",
+      "type": "number",
+      "title": { "en": "Power (W)" },
+      "example": 1200
+    }
+  ]
+}

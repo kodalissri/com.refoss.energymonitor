@@ -1,0 +1,23 @@
+{
+  "id": "meter_power_week_below",
+  "title": {
+    "en": "Weekly energy is less than"
+  },
+  "titleFormatted": {
+    "en": "Weekly energy is less than [[threshold]] kWh"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "min": 0,
+      "step": 0.1,
+      "placeholder": { "en": "kWh" }
+    }
+  ]
+}

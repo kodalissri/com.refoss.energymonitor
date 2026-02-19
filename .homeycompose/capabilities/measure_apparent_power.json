@@ -1,0 +1,16 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Apparent Power"
+  },
+  "units": {
+    "en": "VA"
+  },
+  "decimals": 1,
+  "min": 0,
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "uiComponent": "sensor",
+  "uiQuickAction": false
+}

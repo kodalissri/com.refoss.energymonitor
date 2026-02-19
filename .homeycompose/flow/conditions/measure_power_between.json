@@ -1,0 +1,30 @@
+{
+  "id": "measure_power_between",
+  "title": {
+    "en": "Power is between"
+  },
+  "titleFormatted": {
+    "en": "Power is between [[low]] W and [[high]] W"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "low",
+      "type": "number",
+      "min": 0,
+      "step": 1,
+      "placeholder": { "en": "Min Watts" }
+    },
+    {
+      "name": "high",
+      "type": "number",
+      "min": 0,
+      "step": 1,
+      "placeholder": { "en": "Max Watts" }
+    }
+  ]
+}

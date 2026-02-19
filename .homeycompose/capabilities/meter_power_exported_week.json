@@ -1,0 +1,16 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Exported Energy (Week)"
+  },
+  "units": {
+    "en": "kWh"
+  },
+  "decimals": 3,
+  "min": 0,
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "uiComponent": "sensor",
+  "uiQuickAction": false
+}

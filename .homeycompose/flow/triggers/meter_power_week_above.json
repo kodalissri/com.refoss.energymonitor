@@ -1,0 +1,31 @@
+{
+  "id": "meter_power_week_above",
+  "title": {
+    "en": "Weekly energy exceeds"
+  },
+  "titleFormatted": {
+    "en": "Weekly energy exceeds [[threshold]] kWh"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "min": 0,
+      "step": 0.1,
+      "placeholder": { "en": "kWh" }
+    }
+  ],
+  "tokens": [
+    {
+      "name": "energy",
+      "type": "number",
+      "title": { "en": "Weekly Energy (kWh)" },
+      "example": 35.0
+    }
+  ]
+}

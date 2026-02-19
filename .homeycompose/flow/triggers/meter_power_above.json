@@ -1,0 +1,31 @@
+{
+  "id": "meter_power_above",
+  "title": {
+    "en": "Monthly energy exceeds"
+  },
+  "titleFormatted": {
+    "en": "Monthly energy exceeds [[threshold]] kWh"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "min": 0,
+      "step": 1,
+      "placeholder": { "en": "kWh" }
+    }
+  ],
+  "tokens": [
+    {
+      "name": "energy",
+      "type": "number",
+      "title": { "en": "Monthly Energy (kWh)" },
+      "example": 150.0
+    }
+  ]
+}

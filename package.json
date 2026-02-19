@@ -1,0 +1,17 @@
+{
+  "name": "com.refoss.energymonitor",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "homey": {
+    "compose": {
+      "sourcePath": ".homeycompose"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "homey": "latest"
+  }
+}

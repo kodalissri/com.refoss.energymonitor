@@ -1,0 +1,119 @@
+{
+  "name": {
+    "en": "Refoss EM16P (16-Channel)"
+  },
+  "class": "sensor",
+  "capabilities": [
+    "measure_power",
+    "meter_power",
+    "measure_voltage",
+    "measure_current",
+    "measure_apparent_power",
+    "measure_power_factor",
+    "meter_power_week",
+    "meter_power_day",
+    "meter_power_exported",
+    "meter_power_exported_week",
+    "meter_power_exported_day"
+  ],
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": { "en": "Total Power" },
+      "units": { "en": "W" },
+      "decimals": 1
+    },
+    "meter_power": {
+      "title": { "en": "Total Energy (Month)" },
+      "units": { "en": "kWh" },
+      "decimals": 3
+    },
+    "measure_voltage": {
+      "title": { "en": "Voltage (A1)" },
+      "units": { "en": "V" },
+      "decimals": 1
+    },
+    "measure_current": {
+      "title": { "en": "Total Current" },
+      "units": { "en": "A" },
+      "decimals": 2
+    },
+    "measure_apparent_power": {
+      "title": { "en": "Total Apparent Power" },
+      "units": { "en": "VA" },
+      "decimals": 1
+    },
+    "measure_power_factor": {
+      "title": { "en": "Power Factor (A1)" },
+      "units": { "en": "PF" },
+      "decimals": 2
+    },
+    "meter_power_week": {
+      "title": { "en": "Total Energy (Week)" },
+      "units": { "en": "kWh" },
+      "decimals": 3
+    },
+    "meter_power_day": {
+      "title": { "en": "Total Energy (Today)" },
+      "units": { "en": "kWh" },
+      "decimals": 3
+    },
+    "meter_power_exported": {
+      "title": { "en": "Total Exported Energy (Month)" },
+      "units": { "en": "kWh" },
+      "decimals": 3
+    },
+    "meter_power_exported_week": {
+      "title": { "en": "Total Exported Energy (Week)" },
+      "units": { "en": "kWh" },
+      "decimals": 3
+    },
+    "meter_power_exported_day": {
+      "title": { "en": "Total Exported Energy (Today)" },
+      "units": { "en": "kWh" },
+      "decimals": 3
+    }
+  },
+  "energy": {
+    "cumulative": true,
+    "cumulativeImportedCapability": "meter_power"
+  },
+  "platforms": ["local"],
+  "connectivity": ["lan"],
+  "images": {
+    "small": "/drivers/em16p/assets/images/small.png",
+    "large": "/drivers/em16p/assets/images/large.png"
+  },
+  "pair": [
+    {
+      "id": "enter_ip",
+      "navigation": {
+        "next": "list_channels"
+      }
+    },
+    {
+      "id": "list_channels",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices"
+    }
+  ],
+  "settings": [
+    {
+      "id": "ip_address",
+      "type": "text",
+      "label": { "en": "Device IP Address" },
+      "value": ""
+    },
+    {
+      "id": "poll_interval",
+      "type": "number",
+      "label": { "en": "Poll Interval (seconds)" },
+      "value": 10,
+      "min": 5,
+      "max": 300
+    }
+  ]
+}

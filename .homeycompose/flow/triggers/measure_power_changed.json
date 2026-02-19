@@ -1,0 +1,24 @@
+{
+  "id": "measure_power_changed",
+  "title": {
+    "en": "Power changed"
+  },
+  "titleFormatted": {
+    "en": "Power changed to [[power]] W"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "power",
+      "type": "number",
+      "title": { "en": "Power (W)" },
+      "example": 1200
+    }
+  ]
+}

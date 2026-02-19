@@ -1,0 +1,23 @@
+{
+  "device": {
+    "unreachable": "Device unreachable. Check IP address and network connection.",
+    "error_fetch": "Failed to fetch data from device."
+  },
+  "pair": {
+    "title": "Add Refoss Device",
+    "ip_label": "Device IP Address",
+    "ip_placeholder": "e.g. 192.168.1.100",
+    "name_label": "Device Name",
+    "name_placeholder": "e.g. Main Panel",
+    "add_button": "Add Device",
+    "searching": "Connecting to device...",
+    "error_no_ip": "Please enter a valid IP address.",
+    "error_connect": "Could not connect to device at that IP address.",
+    "error_invalid": "Device responded but returned unexpected data.",
+    "channel_prefix": "Channel"
+  },
+  "settings": {
+    "ip_address": "IP Address",
+    "poll_interval": "Poll Interval (seconds)"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "measure_current_between",
+  "title": {
+    "en": "Current is between"
+  },
+  "titleFormatted": {
+    "en": "Current is between [[low]] A and [[high]] A"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "low",
+      "type": "number",
+      "min": 0,
+      "step": 0.1,
+      "placeholder": { "en": "Min Amps" }
+    },
+    {
+      "name": "high",
+      "type": "number",
+      "min": 0,
+      "step": 0.1,
+      "placeholder": { "en": "Max Amps" }
+    }
+  ]
+}

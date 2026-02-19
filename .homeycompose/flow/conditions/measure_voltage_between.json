@@ -1,0 +1,30 @@
+{
+  "id": "measure_voltage_between",
+  "title": {
+    "en": "Voltage is between"
+  },
+  "titleFormatted": {
+    "en": "Voltage is between [[low]] V and [[high]] V"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "low",
+      "type": "number",
+      "min": 0,
+      "step": 1,
+      "placeholder": { "en": "Min Volts" }
+    },
+    {
+      "name": "high",
+      "type": "number",
+      "min": 0,
+      "step": 1,
+      "placeholder": { "en": "Max Volts" }
+    }
+  ]
+}

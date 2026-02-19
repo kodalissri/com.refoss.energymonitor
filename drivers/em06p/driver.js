@@ -1,0 +1,91 @@
+'use strict';
+
+const Homey = require('homey');
+const RefossApi = require('../../lib/RefossApi');
+
+class Em06pDriver extends Homey.Driver {
+
+  async onInit() {
+    this.log('Em06pDriver initialized');
+  }
+
+  async onPair(session) {
+    let ipAddress = '';
+    let deviceInfo = null;
+    let selectedChannels = RefossApi.EM06P_CHANNELS.map(ch => ({ ...ch, name: ch.label }));
+
+    // Step 1: User enters IP, we validate by hitting the device
+    session.setHandler('validate_ip', async (data) => {
+      ipAddress = (data.ip_address || '').trim();
+
+      if (!ipAddress || !/^\d{1,3}(\.\d{1,3}){3}$/.test(ipAddress)) {
+        throw new Error(this.homey.__('pair.error_no_ip'));
+      }
+
+      try {
+        const api = new RefossApi(ipAddress);
+        deviceInfo = await api.getSystemInfo();
+        return { success: true, deviceInfo };
+      } catch (err) {
+        this.error('validate_ip failed:', err.message);
+        throw new Error(this.homey.__('pair.error_connect'));
+      }
+    });
+
+    // Step 2: User picks which channels (and names) to add
+    session.setHandler('set_selected_channels', async (data) => {
+      if (data && Array.isArray(data.channels) && data.channels.length > 0) {
+        selectedChannels = data.channels;
+      }
+      return { success: true };
+    });
+
+    // Step 3: Homey asks for the list of devices to add
+    session.setHandler('list_devices', async () => {
+      if (!ipAddress) throw new Error('IP address not set');
+
+      const macAddress = (deviceInfo && deviceInfo.mac)
+        ? deviceInfo.mac.replace(/:/g, '').toUpperCase()
+        : ipAddress.replace(/\./g, '');
+
+      const baseName = (deviceInfo && deviceInfo.name)
+        ? deviceInfo.name
+        : `Refoss EM06P (${ipAddress})`;
+
+      // Main aggregate device
+      const mainDevice = {
+        name: baseName,
+        data: {
+          id: `em06p-${macAddress}`,
+          mac: macAddress,
+        },
+        store: { ip_address: ipAddress },
+        settings: { ip_address: ipAddress, poll_interval: 10 },
+      };
+
+      // Channel sub-devices — channelId is the integer from RefossApi.EM06P_CHANNELS
+      const channelDriver = this.homey.drivers.getDriver('em_channel');
+      const channelDevices = selectedChannels.map((ch) => ({
+        name: ch.name || ch.label,
+        driver: channelDriver,
+        data: {
+          id:          `em06p-${macAddress}-ch${ch.id}`,
+          channelId:   ch.id,          // integer 1-based, used for webhook routing
+          deviceMac:   macAddress,     // parent MAC for webhook routing
+          deviceModel: 'em06p',
+        },
+        store: { ip_address: ipAddress },
+        settings: {
+          ip_address:    ipAddress,
+          poll_interval: 10,
+          channel_label: ch.label,
+        },
+      }));
+
+      return [mainDevice, ...channelDevices];
+    });
+  }
+
+}
+
+module.exports = Em06pDriver;

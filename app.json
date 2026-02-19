@@ -1,0 +1,1548 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.refoss.energymonitor",
+  "version": "1.0.0",
+  "compatibility": ">=12.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Refoss Energy Monitor"
+  },
+  "description": {
+    "en": "Local network integration for Refoss energy monitoring devices (EM01P, EM06P, EM16P)."
+  },
+  "category": [
+    "energy"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Refoss Homey App"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/com.refoss.energymonitor/issues"
+  },
+  "source": "https://github.com/your-username/com.refoss.energymonitor",
+  "homeyCommunityTopicId": 0,
+  "flow": {
+    "triggers": [
+      {
+        "id": "measure_power_above",
+        "title": {
+          "en": "Power rises above"
+        },
+        "titleFormatted": {
+          "en": "Power rises above [[threshold]] W"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Watts"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "power",
+            "type": "number",
+            "title": {
+              "en": "Power (W)"
+            },
+            "example": 1200
+          }
+        ]
+      },
+      {
+        "id": "measure_power_below",
+        "title": {
+          "en": "Power drops below"
+        },
+        "titleFormatted": {
+          "en": "Power drops below [[threshold]] W"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Watts"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "power",
+            "type": "number",
+            "title": {
+              "en": "Power (W)"
+            },
+            "example": 50
+          }
+        ]
+      },
+      {
+        "id": "measure_power_changed",
+        "title": {
+          "en": "Power changed"
+        },
+        "titleFormatted": {
+          "en": "Power changed to [[power]] W"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "power",
+            "type": "number",
+            "title": {
+              "en": "Power (W)"
+            },
+            "example": 1200
+          }
+        ]
+      },
+      {
+        "id": "meter_power_above",
+        "title": {
+          "en": "Monthly energy exceeds"
+        },
+        "titleFormatted": {
+          "en": "Monthly energy exceeds [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "energy",
+            "type": "number",
+            "title": {
+              "en": "Monthly Energy (kWh)"
+            },
+            "example": 150
+          }
+        ]
+      },
+      {
+        "id": "meter_power_day_above",
+        "title": {
+          "en": "Daily energy exceeds"
+        },
+        "titleFormatted": {
+          "en": "Daily energy exceeds [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "energy",
+            "type": "number",
+            "title": {
+              "en": "Daily Energy (kWh)"
+            },
+            "example": 5.2
+          }
+        ]
+      },
+      {
+        "id": "meter_power_week_above",
+        "title": {
+          "en": "Weekly energy exceeds"
+        },
+        "titleFormatted": {
+          "en": "Weekly energy exceeds [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "energy",
+            "type": "number",
+            "title": {
+              "en": "Weekly Energy (kWh)"
+            },
+            "example": 35
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "measure_current_above",
+        "title": {
+          "en": "Current is greater than"
+        },
+        "titleFormatted": {
+          "en": "Current is greater than [[threshold]] A"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Amps"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_current_below",
+        "title": {
+          "en": "Current is less than"
+        },
+        "titleFormatted": {
+          "en": "Current is less than [[threshold]] A"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Amps"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_current_between",
+        "title": {
+          "en": "Current is between"
+        },
+        "titleFormatted": {
+          "en": "Current is between [[low]] A and [[high]] A"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "low",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Min Amps"
+            }
+          },
+          {
+            "name": "high",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Max Amps"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_power_above",
+        "title": {
+          "en": "Power is greater than"
+        },
+        "titleFormatted": {
+          "en": "Power is greater than [[threshold]] W"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Watts"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_power_below",
+        "title": {
+          "en": "Power is less than"
+        },
+        "titleFormatted": {
+          "en": "Power is less than [[threshold]] W"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Watts"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_power_between",
+        "title": {
+          "en": "Power is between"
+        },
+        "titleFormatted": {
+          "en": "Power is between [[low]] W and [[high]] W"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "low",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Min Watts"
+            }
+          },
+          {
+            "name": "high",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Max Watts"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_power_factor_above",
+        "title": {
+          "en": "Power factor is greater than"
+        },
+        "titleFormatted": {
+          "en": "Power factor is greater than [[threshold]]"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": -1,
+            "max": 1,
+            "step": 0.01,
+            "placeholder": {
+              "en": "e.g. 0.8"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_power_factor_below",
+        "title": {
+          "en": "Power factor is less than"
+        },
+        "titleFormatted": {
+          "en": "Power factor is less than [[threshold]]"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": -1,
+            "max": 1,
+            "step": 0.01,
+            "placeholder": {
+              "en": "e.g. 0.8"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_voltage_above",
+        "title": {
+          "en": "Voltage is greater than"
+        },
+        "titleFormatted": {
+          "en": "Voltage is greater than [[threshold]] V"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Volts"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_voltage_below",
+        "title": {
+          "en": "Voltage is less than"
+        },
+        "titleFormatted": {
+          "en": "Voltage is less than [[threshold]] V"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Volts"
+            }
+          }
+        ]
+      },
+      {
+        "id": "measure_voltage_between",
+        "title": {
+          "en": "Voltage is between"
+        },
+        "titleFormatted": {
+          "en": "Voltage is between [[low]] V and [[high]] V"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "low",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Min Volts"
+            }
+          },
+          {
+            "name": "high",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "placeholder": {
+              "en": "Max Volts"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_above",
+        "title": {
+          "en": "Monthly energy is greater than"
+        },
+        "titleFormatted": {
+          "en": "Monthly energy is greater than [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_below",
+        "title": {
+          "en": "Monthly energy is less than"
+        },
+        "titleFormatted": {
+          "en": "Monthly energy is less than [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_between",
+        "title": {
+          "en": "Monthly energy is between"
+        },
+        "titleFormatted": {
+          "en": "Monthly energy is between [[low]] kWh and [[high]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "low",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Min kWh"
+            }
+          },
+          {
+            "name": "high",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Max kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_day_above",
+        "title": {
+          "en": "Daily energy is greater than"
+        },
+        "titleFormatted": {
+          "en": "Daily energy is greater than [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_day_below",
+        "title": {
+          "en": "Daily energy is less than"
+        },
+        "titleFormatted": {
+          "en": "Daily energy is less than [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_day_between",
+        "title": {
+          "en": "Daily energy is between"
+        },
+        "titleFormatted": {
+          "en": "Daily energy is between [[low]] kWh and [[high]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "low",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Min kWh"
+            }
+          },
+          {
+            "name": "high",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Max kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_week_above",
+        "title": {
+          "en": "Weekly energy is greater than"
+        },
+        "titleFormatted": {
+          "en": "Weekly energy is greater than [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_week_below",
+        "title": {
+          "en": "Weekly energy is less than"
+        },
+        "titleFormatted": {
+          "en": "Weekly energy is less than [[threshold]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "kWh"
+            }
+          }
+        ]
+      },
+      {
+        "id": "meter_power_week_between",
+        "title": {
+          "en": "Weekly energy is between"
+        },
+        "titleFormatted": {
+          "en": "Weekly energy is between [[low]] kWh and [[high]] kWh"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=em01p|em06p|em16p|em_channel"
+          },
+          {
+            "name": "low",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Min kWh"
+            }
+          },
+          {
+            "name": "high",
+            "type": "number",
+            "min": 0,
+            "step": 0.1,
+            "placeholder": {
+              "en": "Max kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Refoss EM01P (Single-Channel)"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_power",
+        "meter_power",
+        "measure_voltage",
+        "measure_current",
+        "measure_apparent_power",
+        "measure_power_factor",
+        "meter_power_week",
+        "meter_power_day"
+      ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Power"
+          },
+          "units": {
+            "en": "W"
+          },
+          "decimals": 1
+        },
+        "meter_power": {
+          "title": {
+            "en": "Energy (Month)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "measure_voltage": {
+          "title": {
+            "en": "Voltage"
+          },
+          "units": {
+            "en": "V"
+          },
+          "decimals": 1
+        },
+        "measure_current": {
+          "title": {
+            "en": "Current"
+          },
+          "units": {
+            "en": "A"
+          },
+          "decimals": 2
+        },
+        "measure_apparent_power": {
+          "title": {
+            "en": "Apparent Power"
+          },
+          "units": {
+            "en": "VA"
+          },
+          "decimals": 1
+        },
+        "measure_power_factor": {
+          "title": {
+            "en": "Power Factor"
+          },
+          "units": {
+            "en": "PF"
+          },
+          "decimals": 2
+        },
+        "meter_power_week": {
+          "title": {
+            "en": "Energy (Week)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_day": {
+          "title": {
+            "en": "Energy (Today)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/em01p/assets/images/small.png",
+        "large": "/drivers/em01p/assets/images/large.png"
+      },
+      "pair": [
+        {
+          "id": "enter_ip",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "id": "ip_address",
+          "type": "text",
+          "label": {
+            "en": "Device IP Address"
+          },
+          "value": ""
+        },
+        {
+          "id": "poll_interval",
+          "type": "number",
+          "label": {
+            "en": "Poll Interval (seconds)"
+          },
+          "value": 10,
+          "min": 5,
+          "max": 300
+        }
+      ],
+      "id": "em01p"
+    },
+    {
+      "name": {
+        "en": "Refoss EM06P (6-Channel)"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_power",
+        "meter_power",
+        "measure_voltage",
+        "measure_current",
+        "measure_apparent_power",
+        "measure_power_factor",
+        "meter_power_week",
+        "meter_power_day",
+        "meter_power_exported",
+        "meter_power_exported_week",
+        "meter_power_exported_day"
+      ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Total Power"
+          },
+          "units": {
+            "en": "W"
+          },
+          "decimals": 1
+        },
+        "meter_power": {
+          "title": {
+            "en": "Total Energy (Month)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "measure_voltage": {
+          "title": {
+            "en": "Voltage (A1)"
+          },
+          "units": {
+            "en": "V"
+          },
+          "decimals": 1
+        },
+        "measure_current": {
+          "title": {
+            "en": "Total Current"
+          },
+          "units": {
+            "en": "A"
+          },
+          "decimals": 2
+        },
+        "measure_apparent_power": {
+          "title": {
+            "en": "Total Apparent Power"
+          },
+          "units": {
+            "en": "VA"
+          },
+          "decimals": 1
+        },
+        "measure_power_factor": {
+          "title": {
+            "en": "Power Factor (A1)"
+          },
+          "units": {
+            "en": "PF"
+          },
+          "decimals": 2
+        },
+        "meter_power_week": {
+          "title": {
+            "en": "Total Energy (Week)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_day": {
+          "title": {
+            "en": "Total Energy (Today)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported": {
+          "title": {
+            "en": "Total Exported Energy (Month)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported_week": {
+          "title": {
+            "en": "Total Exported Energy (Week)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported_day": {
+          "title": {
+            "en": "Total Exported Energy (Today)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        }
+      },
+      "energy": {
+        "cumulative": true,
+        "cumulativeImportedCapability": "meter_power"
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/em06p/assets/images/small.png",
+        "large": "/drivers/em06p/assets/images/large.png"
+      },
+      "pair": [
+        {
+          "id": "enter_ip",
+          "navigation": {
+            "next": "list_channels"
+          }
+        },
+        {
+          "id": "list_channels",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "id": "ip_address",
+          "type": "text",
+          "label": {
+            "en": "Device IP Address"
+          },
+          "value": ""
+        },
+        {
+          "id": "poll_interval",
+          "type": "number",
+          "label": {
+            "en": "Poll Interval (seconds)"
+          },
+          "value": 10,
+          "min": 5,
+          "max": 300
+        }
+      ],
+      "id": "em06p"
+    },
+    {
+      "name": {
+        "en": "Refoss EM16P (16-Channel)"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_power",
+        "meter_power",
+        "measure_voltage",
+        "measure_current",
+        "measure_apparent_power",
+        "measure_power_factor",
+        "meter_power_week",
+        "meter_power_day",
+        "meter_power_exported",
+        "meter_power_exported_week",
+        "meter_power_exported_day"
+      ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Total Power"
+          },
+          "units": {
+            "en": "W"
+          },
+          "decimals": 1
+        },
+        "meter_power": {
+          "title": {
+            "en": "Total Energy (Month)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "measure_voltage": {
+          "title": {
+            "en": "Voltage (A1)"
+          },
+          "units": {
+            "en": "V"
+          },
+          "decimals": 1
+        },
+        "measure_current": {
+          "title": {
+            "en": "Total Current"
+          },
+          "units": {
+            "en": "A"
+          },
+          "decimals": 2
+        },
+        "measure_apparent_power": {
+          "title": {
+            "en": "Total Apparent Power"
+          },
+          "units": {
+            "en": "VA"
+          },
+          "decimals": 1
+        },
+        "measure_power_factor": {
+          "title": {
+            "en": "Power Factor (A1)"
+          },
+          "units": {
+            "en": "PF"
+          },
+          "decimals": 2
+        },
+        "meter_power_week": {
+          "title": {
+            "en": "Total Energy (Week)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_day": {
+          "title": {
+            "en": "Total Energy (Today)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported": {
+          "title": {
+            "en": "Total Exported Energy (Month)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported_week": {
+          "title": {
+            "en": "Total Exported Energy (Week)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported_day": {
+          "title": {
+            "en": "Total Exported Energy (Today)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        }
+      },
+      "energy": {
+        "cumulative": true,
+        "cumulativeImportedCapability": "meter_power"
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/em16p/assets/images/small.png",
+        "large": "/drivers/em16p/assets/images/large.png"
+      },
+      "pair": [
+        {
+          "id": "enter_ip",
+          "navigation": {
+            "next": "list_channels"
+          }
+        },
+        {
+          "id": "list_channels",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "id": "ip_address",
+          "type": "text",
+          "label": {
+            "en": "Device IP Address"
+          },
+          "value": ""
+        },
+        {
+          "id": "poll_interval",
+          "type": "number",
+          "label": {
+            "en": "Poll Interval (seconds)"
+          },
+          "value": 10,
+          "min": 5,
+          "max": 300
+        }
+      ],
+      "id": "em16p"
+    },
+    {
+      "name": {
+        "en": "Refoss Channel"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "measure_power",
+        "meter_power",
+        "measure_voltage",
+        "measure_current",
+        "measure_apparent_power",
+        "measure_power_factor",
+        "meter_power_week",
+        "meter_power_day",
+        "meter_power_exported",
+        "meter_power_exported_week",
+        "meter_power_exported_day"
+      ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Power"
+          },
+          "units": {
+            "en": "W"
+          },
+          "decimals": 1
+        },
+        "meter_power": {
+          "title": {
+            "en": "Energy (Month)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "measure_voltage": {
+          "title": {
+            "en": "Voltage"
+          },
+          "units": {
+            "en": "V"
+          },
+          "decimals": 1
+        },
+        "measure_current": {
+          "title": {
+            "en": "Current"
+          },
+          "units": {
+            "en": "A"
+          },
+          "decimals": 2
+        },
+        "measure_apparent_power": {
+          "title": {
+            "en": "Apparent Power"
+          },
+          "units": {
+            "en": "VA"
+          },
+          "decimals": 1
+        },
+        "measure_power_factor": {
+          "title": {
+            "en": "Power Factor"
+          },
+          "units": {
+            "en": "PF"
+          },
+          "decimals": 2
+        },
+        "meter_power_week": {
+          "title": {
+            "en": "Energy (Week)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_day": {
+          "title": {
+            "en": "Energy (Today)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported": {
+          "title": {
+            "en": "Exported Energy (Month)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported_week": {
+          "title": {
+            "en": "Exported Energy (Week)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        },
+        "meter_power_exported_day": {
+          "title": {
+            "en": "Exported Energy (Today)"
+          },
+          "units": {
+            "en": "kWh"
+          },
+          "decimals": 3
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/em_channel/assets/images/small.png",
+        "large": "/drivers/em_channel/assets/images/large.png"
+      },
+      "settings": [
+        {
+          "id": "ip_address",
+          "type": "text",
+          "label": {
+            "en": "Device IP Address"
+          },
+          "value": ""
+        },
+        {
+          "id": "poll_interval",
+          "type": "number",
+          "label": {
+            "en": "Poll Interval (seconds)"
+          },
+          "value": 10,
+          "min": 5,
+          "max": 300
+        },
+        {
+          "id": "channel_label",
+          "type": "text",
+          "label": {
+            "en": "Channel Label"
+          },
+          "value": ""
+        }
+      ],
+      "id": "em_channel"
+    }
+  ],
+  "capabilities": {
+    "measure_apparent_power": {
+      "type": "number",
+      "title": {
+        "en": "Apparent Power"
+      },
+      "units": {
+        "en": "VA"
+      },
+      "decimals": 1,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "uiQuickAction": false
+    },
+    "measure_power_factor": {
+      "type": "number",
+      "title": {
+        "en": "Power Factor"
+      },
+      "units": {
+        "en": "PF"
+      },
+      "decimals": 2,
+      "min": -1,
+      "max": 1,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "uiQuickAction": false
+    },
+    "meter_power_day": {
+      "type": "number",
+      "title": {
+        "en": "Daily Energy"
+      },
+      "units": {
+        "en": "kWh"
+      },
+      "decimals": 3,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "uiQuickAction": false
+    },
+    "meter_power_exported": {
+      "type": "number",
+      "title": {
+        "en": "Exported Energy (Month)"
+      },
+      "units": {
+        "en": "kWh"
+      },
+      "decimals": 3,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "uiQuickAction": false
+    },
+    "meter_power_exported_day": {
+      "type": "number",
+      "title": {
+        "en": "Exported Energy (Today)"
+      },
+      "units": {
+        "en": "kWh"
+      },
+      "decimals": 3,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "uiQuickAction": false
+    },
+    "meter_power_exported_week": {
+      "type": "number",
+      "title": {
+        "en": "Exported Energy (Week)"
+      },
+      "units": {
+        "en": "kWh"
+      },
+      "decimals": 3,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "uiQuickAction": false
+    },
+    "meter_power_week": {
+      "type": "number",
+      "title": {
+        "en": "Weekly Energy"
+      },
+      "units": {
+        "en": "kWh"
+      },
+      "decimals": 3,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "uiQuickAction": false
+    }
+  }
+}

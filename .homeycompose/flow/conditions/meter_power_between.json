@@ -1,0 +1,30 @@
+{
+  "id": "meter_power_between",
+  "title": {
+    "en": "Monthly energy is between"
+  },
+  "titleFormatted": {
+    "en": "Monthly energy is between [[low]] kWh and [[high]] kWh"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "low",
+      "type": "number",
+      "min": 0,
+      "step": 0.1,
+      "placeholder": { "en": "Min kWh" }
+    },
+    {
+      "name": "high",
+      "type": "number",
+      "min": 0,
+      "step": 0.1,
+      "placeholder": { "en": "Max kWh" }
+    }
+  ]
+}

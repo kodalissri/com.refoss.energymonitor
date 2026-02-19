@@ -1,0 +1,24 @@
+{
+  "id": "measure_power_factor_below",
+  "title": {
+    "en": "Power factor is less than"
+  },
+  "titleFormatted": {
+    "en": "Power factor is less than [[threshold]]"
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=em01p|em06p|em16p|em_channel"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "min": -1,
+      "max": 1,
+      "step": 0.01,
+      "placeholder": { "en": "e.g. 0.8" }
+    }
+  ]
+}

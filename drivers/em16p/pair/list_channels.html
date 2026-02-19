@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 24px 24px 32px;
+    }
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+      text-align: center;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 0.86rem;
+      text-align: center;
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 12px;
+    }
+    .link-btn {
+      font-size: 0.85rem;
+      color: #007aff;
+      cursor: pointer;
+      user-select: none;
+    }
+    .phase-header {
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #888;
+      margin: 14px 0 6px;
+    }
+    .channel-item {
+      display: flex;
+      align-items: center;
+      padding: 9px 14px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+    .channel-item input[type="checkbox"] {
+      margin-right: 12px;
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+      accent-color: #007aff;
+    }
+    .channel-label {
+      font-weight: 600;
+      flex: 1;
+      font-size: 0.9rem;
+    }
+    .channel-name-input {
+      border: 1.5px solid #d0d0d0;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.86rem;
+      width: 120px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .channel-name-input:focus { border-color: #007aff; }
+    button.next {
+      width: 100%;
+      padding: 13px;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Select Channels</h2>
+  <p class="subtitle">Choose which of the 18 CT transformer channels to add as devices.<br/>
+     Rename each channel to match your installation (e.g. "Kitchen", "HVAC").</p>
+
+  <div class="controls">
+    <span class="link-btn" onclick="selectAll(true)">Select all</span>
+    <span class="link-btn" onclick="selectAll(false)">Deselect all</span>
+  </div>
+
+  <div id="channelList"></div>
+
+  <button class="next" onclick="proceed()">Next</button>
+
+  <script>
+    const PHASES = [
+      { phase: 'Phase A', channels: [
+        { id: 1,  label: 'A1' }, { id: 2,  label: 'A2' }, { id: 3,  label: 'A3' },
+        { id: 4,  label: 'A4' }, { id: 5,  label: 'A5' }, { id: 6,  label: 'A6' },
+      ]},
+      { phase: 'Phase B', channels: [
+        { id: 7,  label: 'B1' }, { id: 8,  label: 'B2' }, { id: 9,  label: 'B3' },
+        { id: 10, label: 'B4' }, { id: 11, label: 'B5' }, { id: 12, label: 'B6' },
+      ]},
+      { phase: 'Phase C', channels: [
+        { id: 13, label: 'C1' }, { id: 14, label: 'C2' }, { id: 15, label: 'C3' },
+        { id: 16, label: 'C4' }, { id: 17, label: 'C5' }, { id: 18, label: 'C6' },
+      ]},
+    ];
+
+    const list = document.getElementById('channelList');
+
+    PHASES.forEach(({ phase, channels }) => {
+      const header = document.createElement('div');
+      header.className = 'phase-header';
+      header.textContent = phase;
+      list.appendChild(header);
+
+      channels.forEach(ch => {
+        const item = document.createElement('div');
+        item.className = 'channel-item';
+        item.innerHTML = `
+          <input type="checkbox" id="ch_${ch.id}" checked />
+          <span class="channel-label">${ch.label}</span>
+          <input type="text" class="channel-name-input" id="name_${ch.id}" value="${ch.label}" placeholder="Name" />
+        `;
+        list.appendChild(item);
+      });
+    });
+
+    function selectAll(checked) {
+      document.querySelectorAll('input[type="checkbox"]').forEach(b => { b.checked = checked; });
+    }
+
+    function proceed() {
+      const selected = [];
+      PHASES.forEach(({ channels }) => {
+        channels.forEach(ch => {
+          const cb = document.getElementById('ch_' + ch.id);
+          if (cb && cb.checked) {
+            const nameInput = document.getElementById('name_' + ch.id);
+            selected.push({
+              channelId: ch.id,
+              label:     ch.label,
+              name:      (nameInput ? nameInput.value.trim() : ch.label) || ch.label,
+            });
+          }
+        });
+      });
+
+      if (selected.length === 0) {
+        alert('Please select at least one channel.');
+        return;
+      }
+
+      Homey.emit('set_selected_channels', { channels: selected })
+        .then(() => Homey.nextView())
+        .catch(err => alert(err.message || 'Error'));
+    }
+  </script>
+</body>
+</html>

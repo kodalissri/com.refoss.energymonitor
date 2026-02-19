@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 24px 24px 32px;
+    }
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+      text-align: center;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 0.86rem;
+      text-align: center;
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 12px;
+    }
+    .link-btn {
+      font-size: 0.85rem;
+      color: #007aff;
+      cursor: pointer;
+      user-select: none;
+    }
+    .channel-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .channel-item input[type="checkbox"] {
+      margin-right: 12px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      accent-color: #007aff;
+    }
+    .channel-label {
+      font-weight: 600;
+      flex: 1;
+      font-size: 0.92rem;
+    }
+    .channel-name-input {
+      border: 1.5px solid #d0d0d0;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.88rem;
+      width: 130px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .channel-name-input:focus { border-color: #007aff; }
+    button.next {
+      width: 100%;
+      padding: 13px;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Select Channels</h2>
+  <p class="subtitle">Choose which CT transformer channels to add as devices.<br/>
+     Rename each channel to match your installation.</p>
+
+  <div class="controls">
+    <span class="link-btn" onclick="toggleAll()">Select / Deselect all</span>
+  </div>
+
+  <div id="channelList"></div>
+
+  <button class="next" onclick="proceed()">Next</button>
+
+  <script>
+    const CHANNELS = [
+      { id: 1, label: 'A1' },
+      { id: 2, label: 'B1' },
+      { id: 3, label: 'C1' },
+      { id: 4, label: 'A2' },
+      { id: 5, label: 'B2' },
+      { id: 6, label: 'C2' },
+    ];
+
+    const list = document.getElementById('channelList');
+
+    CHANNELS.forEach((ch) => {
+      const item = document.createElement('div');
+      item.className = 'channel-item';
+      item.innerHTML = `
+        <input type="checkbox" id="ch_${ch.id}" checked />
+        <span class="channel-label">${ch.label}</span>
+        <input type="text" class="channel-name-input" id="name_${ch.id}" value="${ch.label}" placeholder="Name" />
+      `;
+      list.appendChild(item);
+    });
+
+    function toggleAll() {
+      const boxes = document.querySelectorAll('input[type="checkbox"]');
+      const allChecked = Array.from(boxes).every(b => b.checked);
+      boxes.forEach(b => { b.checked = !allChecked; });
+    }
+
+    function proceed() {
+      const selected = [];
+      CHANNELS.forEach((ch) => {
+        const cb = document.getElementById('ch_' + ch.id);
+        if (cb && cb.checked) {
+          const nameInput = document.getElementById('name_' + ch.id);
+          selected.push({
+            channelId: ch.id,
+            label:     ch.label,
+            name:      (nameInput ? nameInput.value.trim() : ch.label) || ch.label,
+          });
+        }
+      });
+
+      if (selected.length === 0) {
+        alert('Please select at least one channel.');
+        return;
+      }
+
+      Homey.emit('set_selected_channels', { channels: selected })
+        .then(() => Homey.nextView())
+        .catch((err) => alert(err.message || 'Error'));
+    }
+  </script>
+</body>
+</html>
