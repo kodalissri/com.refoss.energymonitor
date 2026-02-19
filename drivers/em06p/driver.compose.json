@@ -14,7 +14,8 @@
     "meter_power_day",
     "meter_power_exported",
     "meter_power_exported_week",
-    "meter_power_exported_day"
+    "meter_power_exported_day",
+    "measure_temperature"
   ],
   "capabilitiesOptions": {
     "measure_power": {

@@ -137,6 +137,7 @@ class Em06pDevice extends Homey.Device {
       if (hasREnergy)  updates.push(this._updateCapability('meter_power_exported',       totalRKwh));
       if (hasRWeek)    updates.push(this._updateCapability('meter_power_exported_week',  totalRWkh));
       if (hasRDay)     updates.push(this._updateCapability('meter_power_exported_day',   totalRDkh));
+      if (statusMap.temperature != null) updates.push(this._updateCapability('measure_temperature', statusMap.temperature));
 
       if (ch1 && ch1.pf !== null)
         updates.push(this._updateCapability('measure_power_factor', ch1.pf));

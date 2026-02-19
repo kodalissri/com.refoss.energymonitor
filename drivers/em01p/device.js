@@ -122,8 +122,9 @@ class Em01pDevice extends Homey.Device {
       if (ch.monthEnergy   != null) updates.push(this._updateCapability('meter_power',            ch.monthEnergy));
       if (ch.apparentPower != null) updates.push(this._updateCapability('measure_apparent_power', ch.apparentPower));
       if (ch.pf            != null) updates.push(this._updateCapability('measure_power_factor',   ch.pf));
-      if (ch.weekEnergy    != null) updates.push(this._updateCapability('meter_power_week',       ch.weekEnergy));
-      if (ch.dayEnergy     != null) updates.push(this._updateCapability('meter_power_day',        ch.dayEnergy));
+      if (ch.weekEnergy    != null) updates.push(this._updateCapability('meter_power_week',        ch.weekEnergy));
+      if (ch.dayEnergy     != null) updates.push(this._updateCapability('meter_power_day',         ch.dayEnergy));
+      if (statusMap.temperature != null) updates.push(this._updateCapability('measure_temperature', statusMap.temperature));
 
       await Promise.all(updates);
       if (!this.getAvailable()) await this.setAvailable();

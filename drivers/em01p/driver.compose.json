@@ -11,7 +11,8 @@
     "measure_apparent_power",
     "measure_power_factor",
     "meter_power_week",
-    "meter_power_day"
+    "meter_power_day",
+    "measure_temperature"
   ],
   "capabilitiesOptions": {
     "measure_power": {
