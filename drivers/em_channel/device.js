@@ -79,11 +79,9 @@ class EmChannelDevice extends Homey.Device {
     if (data.monthEnergy     != null) updates.push(this._updateCapability('meter_power',             data.monthEnergy));
     if (data.apparentPower   != null) updates.push(this._updateCapability('measure_apparent_power',  data.apparentPower));
     if (data.pf              != null) updates.push(this._updateCapability('measure_power_factor',    data.pf));
-    if (data.weekEnergy      != null) updates.push(this._updateCapability('meter_power_week',        data.weekEnergy));
-    if (data.dayEnergy       != null) updates.push(this._updateCapability('meter_power_day',         data.dayEnergy));
-    if (data.monthRetEnergy  != null) updates.push(this._updateCapability('meter_power_exported',      data.monthRetEnergy));
-    if (data.weekRetEnergy   != null) updates.push(this._updateCapability('meter_power_exported_week', data.weekRetEnergy));
-    if (data.dayRetEnergy    != null) updates.push(this._updateCapability('meter_power_exported_day',  data.dayRetEnergy));
+    if (data.weekEnergy      != null) updates.push(this._updateCapability('meter_power_week',     data.weekEnergy));
+    if (data.dayEnergy       != null) updates.push(this._updateCapability('meter_power_day',      data.dayEnergy));
+    if (data.monthRetEnergy  != null) updates.push(this._updateCapability('meter_power.exported', data.monthRetEnergy));
 
     await Promise.all(updates).catch(err => this.error('Capability update error:', err.message));
     if (!this.getAvailable()) await this.setAvailable().catch(() => {});
@@ -123,11 +121,9 @@ class EmChannelDevice extends Homey.Device {
       if (ch.monthEnergy     != null) updates.push(this._updateCapability('meter_power',             ch.monthEnergy));
       if (ch.apparentPower   != null) updates.push(this._updateCapability('measure_apparent_power',  ch.apparentPower));
       if (ch.pf              != null) updates.push(this._updateCapability('measure_power_factor',    ch.pf));
-      if (ch.weekEnergy      != null) updates.push(this._updateCapability('meter_power_week',        ch.weekEnergy));
-      if (ch.dayEnergy       != null) updates.push(this._updateCapability('meter_power_day',         ch.dayEnergy));
-      if (ch.monthRetEnergy  != null) updates.push(this._updateCapability('meter_power_exported',      ch.monthRetEnergy));
-      if (ch.weekRetEnergy   != null) updates.push(this._updateCapability('meter_power_exported_week', ch.weekRetEnergy));
-      if (ch.dayRetEnergy    != null) updates.push(this._updateCapability('meter_power_exported_day',  ch.dayRetEnergy));
+      if (ch.weekEnergy     != null) updates.push(this._updateCapability('meter_power_week',     ch.weekEnergy));
+      if (ch.dayEnergy      != null) updates.push(this._updateCapability('meter_power_day',      ch.dayEnergy));
+      if (ch.monthRetEnergy != null) updates.push(this._updateCapability('meter_power.exported', ch.monthRetEnergy));
 
       await Promise.all(updates);
       if (!this.getAvailable()) await this.setAvailable();

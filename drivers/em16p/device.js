@@ -119,8 +119,6 @@ class Em16pDevice extends Homey.Device {
       let totalDkh  = 0, hasDay     = false;
       let totalVA   = 0, hasVA      = false;
       let totalRKwh = 0, hasREnergy = false;
-      let totalRWkh = 0, hasRWeek   = false;
-      let totalRDkh = 0, hasRDay    = false;
       for (const ch of RefossApi.EM16P_CHANNELS) {
         const entry = statusMap[ch.id];
         if (entry && entry.monthEnergy    !== null) { totalKwh  += entry.monthEnergy;    hasEnergy   = true; }
@@ -128,16 +126,12 @@ class Em16pDevice extends Homey.Device {
         if (entry && entry.dayEnergy      !== null) { totalDkh  += entry.dayEnergy;      hasDay      = true; }
         if (entry && entry.apparentPower  !== null) { totalVA   += entry.apparentPower;  hasVA       = true; }
         if (entry && entry.monthRetEnergy !== null) { totalRKwh += entry.monthRetEnergy; hasREnergy  = true; }
-        if (entry && entry.weekRetEnergy  !== null) { totalRWkh += entry.weekRetEnergy;  hasRWeek    = true; }
-        if (entry && entry.dayRetEnergy   !== null) { totalRDkh += entry.dayRetEnergy;   hasRDay     = true; }
       }
-      if (hasEnergy)   updates.push(this._updateCapability('meter_power',               totalKwh));
-      if (hasWeek)     updates.push(this._updateCapability('meter_power_week',           totalWkh));
-      if (hasDay)      updates.push(this._updateCapability('meter_power_day',            totalDkh));
-      if (hasVA)       updates.push(this._updateCapability('measure_apparent_power',     totalVA));
-      if (hasREnergy)  updates.push(this._updateCapability('meter_power_exported',       totalRKwh));
-      if (hasRWeek)    updates.push(this._updateCapability('meter_power_exported_week',  totalRWkh));
-      if (hasRDay)     updates.push(this._updateCapability('meter_power_exported_day',   totalRDkh));
+      if (hasEnergy)   updates.push(this._updateCapability('meter_power',           totalKwh));
+      if (hasWeek)     updates.push(this._updateCapability('meter_power_week',       totalWkh));
+      if (hasDay)      updates.push(this._updateCapability('meter_power_day',        totalDkh));
+      if (hasVA)       updates.push(this._updateCapability('measure_apparent_power', totalVA));
+      if (hasREnergy)  updates.push(this._updateCapability('meter_power.exported',   totalRKwh));
       if (statusMap.temperature != null) updates.push(this._updateCapability('measure_temperature', statusMap.temperature));
 
       if (ch1 && ch1.pf !== null)

@@ -6,15 +6,13 @@
   "capabilities": [
     "measure_power",
     "meter_power",
+    "meter_power.exported",
     "measure_voltage",
     "measure_current",
     "measure_apparent_power",
     "measure_power_factor",
     "meter_power_week",
-    "meter_power_day",
-    "meter_power_exported",
-    "meter_power_exported_week",
-    "meter_power_exported_day"
+    "meter_power_day"
   ],
   "capabilitiesOptions": {
     "measure_power": {
@@ -25,6 +23,10 @@
     "meter_power": {
       "title": { "en": "Energy (Month)" },
       "units": { "en": "kWh" },
+      "decimals": 3
+    },
+    "meter_power.exported": {
+      "title": { "en": "Exported Energy (Month)" },
       "decimals": 3
     },
     "measure_voltage": {
@@ -56,22 +58,11 @@
       "title": { "en": "Energy (Today)" },
       "units": { "en": "kWh" },
       "decimals": 3
-    },
-    "meter_power_exported": {
-      "title": { "en": "Exported Energy (Month)" },
-      "units": { "en": "kWh" },
-      "decimals": 3
-    },
-    "meter_power_exported_week": {
-      "title": { "en": "Exported Energy (Week)" },
-      "units": { "en": "kWh" },
-      "decimals": 3
-    },
-    "meter_power_exported_day": {
-      "title": { "en": "Exported Energy (Today)" },
-      "units": { "en": "kWh" },
-      "decimals": 3
     }
+  },
+  "energy": {
+    "cumulativeImportedCapability": "meter_power",
+    "cumulativeExportedCapability": "meter_power.exported"
   },
   "platforms": ["local"],
   "connectivity": ["lan"],
