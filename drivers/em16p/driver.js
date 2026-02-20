@@ -11,23 +11,27 @@ class Em16pDriver extends Homey.Driver {
 
   async onPair(session) {
     let ipAddress = '';
+    let username  = null;
+    let password  = null;
     let deviceInfo = null;
     let selectedChannels = RefossApi.EM16P_CHANNELS.map(ch => ({ ...ch, name: ch.label }));
 
     session.setHandler('validate_ip', async (data) => {
       ipAddress = (data.ip_address || '').trim();
+      username  = (data.username || '').trim() || null;
+      password  = data.password || null;
 
       if (!ipAddress || !/^\d{1,3}(\.\d{1,3}){3}$/.test(ipAddress)) {
         throw new Error(this.homey.__('pair.error_no_ip'));
       }
 
       try {
-        const api = new RefossApi(ipAddress);
+        const api = new RefossApi(ipAddress, username, password);
         deviceInfo = await api.getSystemInfo();
         return { success: true, deviceInfo };
       } catch (err) {
         this.error('validate_ip failed:', err.message);
-        throw new Error(this.homey.__('pair.error_connect'));
+        throw new Error(err.message || this.homey.__('pair.error_connect'));
       }
     });
 
@@ -56,7 +60,12 @@ class Em16pDriver extends Homey.Driver {
           mac: macAddress,
         },
         store: { ip_address: ipAddress },
-        settings: { ip_address: ipAddress, poll_interval: 10 },
+        settings: {
+          ip_address:    ipAddress,
+          poll_interval: 10,
+          username:      username || '',
+          password:      password || '',
+        },
       };
 
       const channelDriver = this.homey.drivers.getDriver('em_channel');
@@ -74,6 +83,8 @@ class Em16pDriver extends Homey.Driver {
           ip_address:    ipAddress,
           poll_interval: 10,
           channel_label: ch.label,
+          username:      username || '',
+          password:      password || '',
         },
       }));
 

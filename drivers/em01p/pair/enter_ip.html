@@ -5,64 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
+    html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #fff;
-      color: #222;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      padding: 32px 24px 24px;
+      background: #fff; color: #222;
+      display: flex; flex-direction: column; align-items: stretch;
+      padding: 24px 24px 24px;
     }
-    h2 {
-      font-size: 1.35rem;
-      font-weight: 700;
-      margin: 0 0 8px;
-      text-align: center;
+    h2 { font-size: 1.35rem; font-weight: 700; margin: 0 0 6px; text-align: center; }
+    .subtitle { color: #666; font-size: 0.86rem; text-align: center; margin: 0 0 20px; line-height: 1.5; }
+    label { font-weight: 600; font-size: 0.86rem; margin-bottom: 5px; display: block; color: #444; }
+    .optional { font-weight: 400; color: #999; }
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 10px 13px; border: 1.5px solid #d0d0d0;
+      border-radius: 10px; font-size: 0.95rem; outline: none;
+      transition: border-color 0.15s; margin-bottom: 13px;
     }
-    .subtitle {
-      color: #666;
-      font-size: 0.88rem;
-      text-align: center;
-      margin: 0 0 28px;
-      line-height: 1.5;
+    input:focus { border-color: #007aff; }
+    .section-divider { border: none; border-top: 1px solid #ececec; margin: 4px 0 14px; }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #aaa; margin-bottom: 10px;
     }
-    label {
-      font-weight: 600;
-      font-size: 0.88rem;
-      margin-bottom: 6px;
-      display: block;
-      color: #444;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid #d0d0d0;
-      border-radius: 10px;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.15s;
-      margin-bottom: 16px;
-    }
-    input[type="text"]:focus { border-color: #007aff; }
     button {
-      width: 100%;
-      padding: 13px;
-      background: #007aff;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: opacity 0.15s;
+      width: 100%; padding: 13px; background: #007aff; color: #fff;
+      border: none; border-radius: 10px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; margin-top: 6px; transition: opacity 0.15s;
     }
     button:disabled { opacity: 0.45; cursor: default; }
     #error  { color: #cc0000; font-size: 0.85rem; margin-top: 10px; min-height: 18px; text-align: center; }
@@ -71,14 +39,23 @@
 </head>
 <body>
   <h2>Add Refoss EM01P</h2>
-  <p class="subtitle">Enter the local IP address of your Refoss EM01P device.<br/>
-     You can find it in your router's DHCP client list or the Refoss app.</p>
+  <p class="subtitle">Enter the local IP address of your device.<br/>
+     You can find it in your router's DHCP list or the Refoss app.</p>
 
   <label for="ip">IP Address</label>
   <input type="text" id="ip" placeholder="e.g. 192.168.1.102" autocomplete="off" />
 
-  <label for="devname">Device Name <span style="font-weight:400;color:#888;">(optional)</span></label>
+  <label for="devname">Device Name <span class="optional">(optional)</span></label>
   <input type="text" id="devname" placeholder="e.g. Garage Monitor" />
+
+  <hr class="section-divider" />
+  <div class="section-label">Authentication <span class="optional" style="text-transform:none;letter-spacing:0;">(leave blank if not set)</span></div>
+
+  <label for="username">Username</label>
+  <input type="text" id="username" placeholder="e.g. admin" autocomplete="off" autocorrect="off" autocapitalize="off" />
+
+  <label for="password">Password</label>
+  <input type="password" id="password" placeholder="device password" autocomplete="off" />
 
   <button id="btn" onclick="connect()">Connect</button>
   <div id="error"></div>
@@ -86,11 +63,13 @@
 
   <script>
     function connect() {
-      const ip      = document.getElementById('ip').value.trim();
-      const name    = document.getElementById('devname').value.trim();
-      const errorEl = document.getElementById('error');
-      const statusEl= document.getElementById('status');
-      const btn     = document.getElementById('btn');
+      const ip       = document.getElementById('ip').value.trim();
+      const name     = document.getElementById('devname').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const errorEl  = document.getElementById('error');
+      const statusEl = document.getElementById('status');
+      const btn      = document.getElementById('btn');
 
       errorEl.textContent = '';
       statusEl.textContent = '';
@@ -103,7 +82,12 @@
       btn.disabled = true;
       statusEl.textContent = 'Connecting to device\u2026';
 
-      Homey.emit('validate_ip', { ip_address: ip, device_name: name || null })
+      Homey.emit('validate_ip', {
+        ip_address:  ip,
+        device_name: name     || null,
+        username:    username || null,
+        password:    password || null,
+      })
         .then(() => {
           statusEl.textContent = 'Connected! Adding device\u2026';
           Homey.nextView();
@@ -119,6 +103,12 @@
       if (e.key === 'Enter') document.getElementById('devname').focus();
     });
     document.getElementById('devname').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('username').focus();
+    });
+    document.getElementById('username').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('password').focus();
+    });
+    document.getElementById('password').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') connect();
     });
   </script>

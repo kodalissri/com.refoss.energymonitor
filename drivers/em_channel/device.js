@@ -30,8 +30,10 @@ class EmChannelDevice extends Homey.Device {
 
     // Mutable settings
     this._ipAddress   = this.getSetting('ip_address') || this.getStoreValue('ip_address');
+    this._username    = this.getSetting('username') || null;
+    this._password    = this.getSetting('password') || null;
     this._pollInterval = Math.max(MIN_POLL_INTERVAL_S, this.getSetting('poll_interval') || DEFAULT_POLL_INTERVAL_S) * 1000;
-    this._api         = new RefossApi(this._ipAddress);
+    this._api         = new RefossApi(this._ipAddress, this._username, this._password);
 
     // Register with the app so webhook pushes are routed here by channelId
     this.homey.app.registerChannelHandler(this._deviceMac, this._channelId, (data) => {
@@ -137,10 +139,11 @@ class EmChannelDevice extends Homey.Device {
   }
 
   async onSettings({ newSettings }) {
-    if (newSettings.ip_address && newSettings.ip_address !== this._ipAddress) {
+    if (newSettings.ip_address && newSettings.ip_address !== this._ipAddress)
       this._ipAddress = newSettings.ip_address;
-      this._api = new RefossApi(this._ipAddress);
-    }
+    if (newSettings.username !== undefined) this._username = newSettings.username || null;
+    if (newSettings.password !== undefined) this._password = newSettings.password || null;
+    this._api = new RefossApi(this._ipAddress, this._username, this._password);
     if (newSettings.poll_interval)
       this._pollInterval = Math.max(MIN_POLL_INTERVAL_S, newSettings.poll_interval) * 1000;
     this._startPolling(FALLBACK_POLL_INTERVAL_MS);

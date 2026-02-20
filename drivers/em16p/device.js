@@ -14,8 +14,10 @@ class Em16pDevice extends Homey.Device {
 
     this._mac           = this.getData().mac;
     this._ipAddress     = this.getStoreValue('ip_address') || this.getSetting('ip_address');
+    this._username      = this.getSetting('username') || null;
+    this._password      = this.getSetting('password') || null;
     this._pollInterval  = Math.max(MIN_POLL_INTERVAL_S, this.getSetting('poll_interval') || DEFAULT_POLL_INTERVAL_S) * 1000;
-    this._api           = new RefossApi(this._ipAddress);
+    this._api           = new RefossApi(this._ipAddress, this._username, this._password);
     this._webhookId     = null;
     this._webhookActive = false;
 
@@ -153,9 +155,11 @@ class Em16pDevice extends Homey.Device {
   async onSettings({ newSettings }) {
     if (newSettings.ip_address && newSettings.ip_address !== this._ipAddress) {
       this._ipAddress = newSettings.ip_address;
-      this._api = new RefossApi(this._ipAddress);
       await this.setStoreValue('ip_address', this._ipAddress);
     }
+    if (newSettings.username !== undefined) this._username = newSettings.username || null;
+    if (newSettings.password !== undefined) this._password = newSettings.password || null;
+    this._api = new RefossApi(this._ipAddress, this._username, this._password);
     if (newSettings.poll_interval)
       this._pollInterval = Math.max(MIN_POLL_INTERVAL_S, newSettings.poll_interval) * 1000;
     await this._teardownWebhook();

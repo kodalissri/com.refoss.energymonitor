@@ -14,24 +14,28 @@ class Em01pDriver extends Homey.Driver {
 
   async onPair(session) {
     let ipAddress = '';
+    let username   = null;
+    let password   = null;
     let deviceInfo = null;
     let customName = null;
 
     session.setHandler('validate_ip', async (data) => {
-      ipAddress = (data.ip_address || '').trim();
+      ipAddress  = (data.ip_address || '').trim();
       customName = (data.device_name || '').trim() || null;
+      username   = (data.username || '').trim() || null;
+      password   = data.password || null;
 
       if (!ipAddress || !/^\d{1,3}(\.\d{1,3}){3}$/.test(ipAddress)) {
         throw new Error(this.homey.__('pair.error_no_ip'));
       }
 
       try {
-        const api = new RefossApi(ipAddress);
+        const api = new RefossApi(ipAddress, username, password);
         deviceInfo = await api.getSystemInfo();
         return { success: true, deviceInfo };
       } catch (err) {
         this.error('validate_ip failed:', err.message);
-        throw new Error(this.homey.__('pair.error_connect'));
+        throw new Error(err.message || this.homey.__('pair.error_connect'));
       }
     });
 
@@ -57,8 +61,10 @@ class Em01pDriver extends Homey.Driver {
             ip_address: ipAddress,
           },
           settings: {
-            ip_address: ipAddress,
+            ip_address:    ipAddress,
             poll_interval: 10,
+            username:      username || '',
+            password:      password || '',
           },
         },
       ];

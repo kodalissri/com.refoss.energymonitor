@@ -915,6 +915,22 @@
           "value": ""
         },
         {
+          "id": "username",
+          "type": "text",
+          "label": {
+            "en": "Username (if password protected)"
+          },
+          "value": ""
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "label": {
+            "en": "Password (if password protected)"
+          },
+          "value": ""
+        },
+        {
           "id": "poll_interval",
           "type": "number",
           "label": {
@@ -1084,6 +1100,22 @@
           "type": "text",
           "label": {
             "en": "Device IP Address"
+          },
+          "value": ""
+        },
+        {
+          "id": "username",
+          "type": "text",
+          "label": {
+            "en": "Username (if password protected)"
+          },
+          "value": ""
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "label": {
+            "en": "Password (if password protected)"
           },
           "value": ""
         },
@@ -1261,6 +1293,22 @@
           "value": ""
         },
         {
+          "id": "username",
+          "type": "text",
+          "label": {
+            "en": "Username (if password protected)"
+          },
+          "value": ""
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "label": {
+            "en": "Password (if password protected)"
+          },
+          "value": ""
+        },
+        {
           "id": "poll_interval",
           "type": "number",
           "label": {
@@ -1408,6 +1456,22 @@
           "type": "text",
           "label": {
             "en": "Device IP Address"
+          },
+          "value": ""
+        },
+        {
+          "id": "username",
+          "type": "text",
+          "label": {
+            "en": "Username (if password protected)"
+          },
+          "value": ""
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "label": {
+            "en": "Password (if password protected)"
           },
           "value": ""
         },
