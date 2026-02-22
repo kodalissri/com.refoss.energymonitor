@@ -44,7 +44,10 @@ class Em06pDriver extends Homey.Driver {
       return { success: true };
     });
 
-    // Step 3: Homey asks for the list of devices to add
+    // Step 3: Homey asks for the list of devices to add.
+    // We return ONLY the main aggregate device here.
+    // The em_channel sub-devices are created programmatically in onAdded()
+    // using the selectedChannels stored in the main device's store.
     session.setHandler('list_devices', async () => {
       if (!ipAddress) throw new Error('IP address not set');
 
@@ -56,49 +59,33 @@ class Em06pDriver extends Homey.Driver {
         ? deviceInfo.name
         : `Refoss EM06P (${ipAddress})`;
 
-      // Main aggregate device
-      const mainDevice = {
-        name: baseName,
-        data: {
-          id: `em06p-${macAddress}`,
-          mac: macAddress,
-        },
-        store: { ip_address: ipAddress },
-        settings: {
-          ip_address:    ipAddress,
-          poll_interval: 10,
-          username:      username || '',
-          password:      password || '',
-        },
-      };
+      // Normalise selectedChannels: accept both { channelId, label, name }
+      // (from list_channels.html) and { id, label, name } (from EM06P_CHANNELS default)
+      const normChannels = selectedChannels.map((ch) => ({
+        id:    ch.channelId != null ? ch.channelId : ch.id,
+        label: ch.label,
+        name:  ch.name || ch.label,
+      }));
 
-      // Channel sub-devices — channelId is the integer from RefossApi.EM06P_CHANNELS
-      const channelDriver = this.homey.drivers.getDriver('em_channel');
-      // ch.id comes from RefossApi.EM06P_CHANNELS default; ch.channelId comes
-      // from list_channels.html emit. Support both so either source works.
-      const channelDevices = selectedChannels.map((ch) => {
-        const chId = ch.channelId != null ? ch.channelId : ch.id;
-        return {
-          name: ch.name || ch.label,
-          driver: channelDriver,
+      return [
+        {
+          name: baseName,
           data: {
-            id:          `em06p-${macAddress}-ch${chId}`,
-            channelId:   chId,          // integer 1-based, used for webhook routing
-            deviceMac:   macAddress,    // parent MAC for webhook routing
-            deviceModel: 'em06p',
+            id:  `em06p-${macAddress}`,
+            mac: macAddress,
           },
-          store: { ip_address: ipAddress },
+          store: {
+            ip_address:        ipAddress,
+            selected_channels: JSON.stringify(normChannels),
+          },
           settings: {
             ip_address:    ipAddress,
             poll_interval: 10,
-            channel_label: ch.label,
             username:      username || '',
             password:      password || '',
           },
-        };
-      });
-
-      return [mainDevice, ...channelDevices];
+        },
+      ];
     });
   }
 

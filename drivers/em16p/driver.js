@@ -42,6 +42,7 @@ class Em16pDriver extends Homey.Driver {
       return { success: true };
     });
 
+    // Return ONLY the main device — em_channel devices are created in onAdded()
     session.setHandler('list_devices', async () => {
       if (!ipAddress) throw new Error('IP address not set');
 
@@ -53,47 +54,31 @@ class Em16pDriver extends Homey.Driver {
         ? deviceInfo.name
         : `Refoss EM16P (${ipAddress})`;
 
-      const mainDevice = {
-        name: baseName,
-        data: {
-          id:  `em16p-${macAddress}`,
-          mac: macAddress,
-        },
-        store: { ip_address: ipAddress },
-        settings: {
-          ip_address:    ipAddress,
-          poll_interval: 10,
-          username:      username || '',
-          password:      password || '',
-        },
-      };
+      const normChannels = selectedChannels.map((ch) => ({
+        id:    ch.channelId != null ? ch.channelId : ch.id,
+        label: ch.label,
+        name:  ch.name || ch.label,
+      }));
 
-      const channelDriver = this.homey.drivers.getDriver('em_channel');
-      // ch.id comes from RefossApi.EM16P_CHANNELS default; ch.channelId comes
-      // from list_channels.html emit. Support both so either source works.
-      const channelDevices = selectedChannels.map((ch) => {
-        const chId = ch.channelId != null ? ch.channelId : ch.id;
-        return {
-          name: ch.name || ch.label,
-          driver: channelDriver,
+      return [
+        {
+          name: baseName,
           data: {
-            id:          `em16p-${macAddress}-ch${chId}`,
-            channelId:   chId,
-            deviceMac:   macAddress,
-            deviceModel: 'em16p',
+            id:  `em16p-${macAddress}`,
+            mac: macAddress,
           },
-          store: { ip_address: ipAddress },
+          store: {
+            ip_address:        ipAddress,
+            selected_channels: JSON.stringify(normChannels),
+          },
           settings: {
             ip_address:    ipAddress,
             poll_interval: 10,
-            channel_label: ch.label,
             username:      username || '',
             password:      password || '',
           },
-        };
-      });
-
-      return [mainDevice, ...channelDevices];
+        },
+      ];
     });
   }
 

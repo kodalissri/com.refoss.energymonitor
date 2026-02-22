@@ -147,6 +147,52 @@ class Em06pDevice extends Homey.Device {
     }
   }
 
+  // Called by Homey once the main device has been successfully added.
+  // Creates the em_channel sub-devices for every selected channel.
+  async onAdded() {
+    this.log(`Em06pDevice added: ${this.getName()} — creating channel devices`);
+
+    const macAddress  = this._mac || this.getData().mac;
+    const ipAddress   = this.getStoreValue('ip_address') || this.getSetting('ip_address');
+    const username    = this.getSetting('username') || '';
+    const password    = this.getSetting('password') || '';
+
+    let channels = [];
+    try {
+      channels = JSON.parse(this.getStoreValue('selected_channels') || '[]');
+    } catch (_) {
+      channels = RefossApi.EM06P_CHANNELS.map(ch => ({ id: ch.id, label: ch.label, name: ch.label }));
+    }
+
+    const channelDriver = this.homey.drivers.getDriver('em_channel');
+
+    for (const ch of channels) {
+      const deviceDef = {
+        name: ch.name || ch.label,
+        data: {
+          id:          `em06p-${macAddress}-ch${ch.id}`,
+          channelId:   ch.id,
+          deviceMac:   macAddress,
+          deviceModel: 'em06p',
+        },
+        store: { ip_address: ipAddress },
+        settings: {
+          ip_address:    ipAddress,
+          poll_interval: 10,
+          channel_label: ch.label,
+          username,
+          password,
+        },
+      };
+      try {
+        await channelDriver.createDevice(deviceDef);
+        this.log(`Created em_channel device for ch${ch.id} (${ch.name})`);
+      } catch (err) {
+        this.error(`Failed to create channel device ch${ch.id}:`, err.message);
+      }
+    }
+  }
+
   async onSettings({ newSettings }) {
     if (newSettings.ip_address && newSettings.ip_address !== this._ipAddress) {
       this._ipAddress = newSettings.ip_address;
