@@ -69,24 +69,29 @@ class Em16pDriver extends Homey.Driver {
       };
 
       const channelDriver = this.homey.drivers.getDriver('em_channel');
-      const channelDevices = selectedChannels.map((ch) => ({
-        name: ch.name || ch.label,
-        driver: channelDriver,
-        data: {
-          id:          `em16p-${macAddress}-ch${ch.id}`,
-          channelId:   ch.id,
-          deviceMac:   macAddress,
-          deviceModel: 'em16p',
-        },
-        store: { ip_address: ipAddress },
-        settings: {
-          ip_address:    ipAddress,
-          poll_interval: 10,
-          channel_label: ch.label,
-          username:      username || '',
-          password:      password || '',
-        },
-      }));
+      // ch.id comes from RefossApi.EM16P_CHANNELS default; ch.channelId comes
+      // from list_channels.html emit. Support both so either source works.
+      const channelDevices = selectedChannels.map((ch) => {
+        const chId = ch.channelId != null ? ch.channelId : ch.id;
+        return {
+          name: ch.name || ch.label,
+          driver: channelDriver,
+          data: {
+            id:          `em16p-${macAddress}-ch${chId}`,
+            channelId:   chId,
+            deviceMac:   macAddress,
+            deviceModel: 'em16p',
+          },
+          store: { ip_address: ipAddress },
+          settings: {
+            ip_address:    ipAddress,
+            poll_interval: 10,
+            channel_label: ch.label,
+            username:      username || '',
+            password:      password || '',
+          },
+        };
+      });
 
       return [mainDevice, ...channelDevices];
     });

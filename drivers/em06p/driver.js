@@ -74,24 +74,29 @@ class Em06pDriver extends Homey.Driver {
 
       // Channel sub-devices — channelId is the integer from RefossApi.EM06P_CHANNELS
       const channelDriver = this.homey.drivers.getDriver('em_channel');
-      const channelDevices = selectedChannels.map((ch) => ({
-        name: ch.name || ch.label,
-        driver: channelDriver,
-        data: {
-          id:          `em06p-${macAddress}-ch${ch.id}`,
-          channelId:   ch.id,          // integer 1-based, used for webhook routing
-          deviceMac:   macAddress,     // parent MAC for webhook routing
-          deviceModel: 'em06p',
-        },
-        store: { ip_address: ipAddress },
-        settings: {
-          ip_address:    ipAddress,
-          poll_interval: 10,
-          channel_label: ch.label,
-          username:      username || '',
-          password:      password || '',
-        },
-      }));
+      // ch.id comes from RefossApi.EM06P_CHANNELS default; ch.channelId comes
+      // from list_channels.html emit. Support both so either source works.
+      const channelDevices = selectedChannels.map((ch) => {
+        const chId = ch.channelId != null ? ch.channelId : ch.id;
+        return {
+          name: ch.name || ch.label,
+          driver: channelDriver,
+          data: {
+            id:          `em06p-${macAddress}-ch${chId}`,
+            channelId:   chId,          // integer 1-based, used for webhook routing
+            deviceMac:   macAddress,    // parent MAC for webhook routing
+            deviceModel: 'em06p',
+          },
+          store: { ip_address: ipAddress },
+          settings: {
+            ip_address:    ipAddress,
+            poll_interval: 10,
+            channel_label: ch.label,
+            username:      username || '',
+            password:      password || '',
+          },
+        };
+      });
 
       return [mainDevice, ...channelDevices];
     });

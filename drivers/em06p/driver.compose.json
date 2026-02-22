@@ -86,7 +86,8 @@
       }
     },
     {
-      "id": "add_devices"
+      "id": "add_devices",
+      "template": "add_devices"
     }
   ],
   "settings": [
