@@ -1,0 +1,34 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Homey App Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Homey CLI
+        run: npm install -g homey
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Compose app
+        run: homey app compose
+
+      - name: Validate app
+        run: homey app validate

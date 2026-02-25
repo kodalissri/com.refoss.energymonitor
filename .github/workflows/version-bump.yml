@@ -1,0 +1,135 @@
+name: Version Bump & Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      changelog:
+        description: 'Changelog for this release (one bullet per line, no dashes needed)'
+        required: true
+        type: string
+
+jobs:
+  bump:
+    name: Bump version and push tag
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Homey CLI
+        run: npm install -g homey
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Compute new version
+        id: ver
+        run: |
+          BUMP="${{ inputs.bump }}"
+          OLD=$(node -p "require('./package.json').version")
+          IFS='.' read -r MAJ MIN PAT <<< "$OLD"
+          if   [ "$BUMP" = "major" ]; then NEW="$((MAJ+1)).0.0"
+          elif [ "$BUMP" = "minor" ]; then NEW="${MAJ}.$((MIN+1)).0"
+          else                              NEW="${MAJ}.${MIN}.$((PAT+1))"
+          fi
+          echo "old=$OLD" >> $GITHUB_OUTPUT
+          echo "new=$NEW" >> $GITHUB_OUTPUT
+          echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          echo "Bumping $OLD → $NEW ($BUMP)"
+
+      - name: Update version in package.json and app.json
+        run: |
+          NEW="${{ steps.ver.outputs.new }}"
+
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            p.version = '$NEW';
+            fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          "
+
+          node -e "
+            const fs = require('fs');
+            const a = JSON.parse(fs.readFileSync('.homeycompose/app.json', 'utf8'));
+            a.version = '$NEW';
+            fs.writeFileSync('.homeycompose/app.json', JSON.stringify(a, null, 2) + '\n');
+          "
+
+          homey app compose
+
+      - name: Update CHANGELOG.md
+        run: |
+          NEW="${{ steps.ver.outputs.new }}"
+          DATE="${{ steps.ver.outputs.date }}"
+          RAW_CHANGELOG="${{ inputs.changelog }}"
+
+          # Format each non-empty line as a bullet
+          BULLETS=$(echo "$RAW_CHANGELOG" | while IFS= read -r line; do
+            line=$(echo "$line" | sed 's/^[[:space:]]*//')
+            [ -z "$line" ] && continue
+            if [[ "$line" == -* ]]; then echo "$line"
+            else echo "- $line"
+            fi
+          done)
+
+          ENTRY="## ${NEW} (${DATE})"$'\n\n'"${BULLETS}"$'\n'
+
+          if [ -f CHANGELOG.md ]; then
+            # Insert after the "# Changelog" header line
+            awk -v entry="$ENTRY" '
+              /^# Changelog/ { print; print ""; print entry; next }
+              { print }
+            ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+          else
+            printf "# Changelog\n\n%s\n" "$ENTRY" > CHANGELOG.md
+          fi
+
+          echo "CHANGELOG.md updated:"
+          head -20 CHANGELOG.md
+
+      - name: Commit, tag, and push
+        run: |
+          NEW="${{ steps.ver.outputs.new }}"
+          git add package.json .homeycompose/app.json app.json CHANGELOG.md
+          git commit -m "chore: release v${NEW}"
+          git tag "v${NEW}"
+          git push origin main --tags
+          echo "✓ Tagged and pushed v${NEW}"
+
+      - name: Summary
+        run: |
+          echo "## Release v${{ steps.ver.outputs.new }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Bumped:** ${{ steps.ver.outputs.old }} → ${{ steps.ver.outputs.new }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Changelog:**" >> $GITHUB_STEP_SUMMARY
+          echo "${{ inputs.changelog }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The \`publish\` workflow will now trigger automatically on tag \`v${{ steps.ver.outputs.new }}\`." >> $GITHUB_STEP_SUMMARY
