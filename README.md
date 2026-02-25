@@ -38,24 +38,19 @@ Integrates Refoss energy monitoring devices (EM01P, EM06P, EM16P) with Homey Pro
 
 ## API Notes
 
-All communication uses the Refoss local HTTP API:
-- `GET http://<device_ip>/rpc/Em.Status.Get?id=0` — live readings
-- `GET http://<device_ip>/rpc/Em.Data.Get?id=0` — cumulative energy
-- `GET http://<device_ip>/rpc/Refoss.GetDeviceInfo` — device identity
+All communication uses the Refoss local HTTP API (no cloud):
+- `GET http://<device_ip>/rpc/Refoss.GetDeviceInfo` — device identity and MAC
+- `GET http://<device_ip>/rpc/Em.Status.Get?id=65535` — live readings for all channels
 
-Units returned by device: power in mW, voltage in mV, current in mA, energy in Wh.
-This app converts all values to W, V, A, kWh.
+Units are returned in SI units (W, V, A, kWh) — no conversion needed.
+
+Webhook push: the device POSTs to `http://<homey_ip>:8741/webhook/<MAC>` on every
+value change, giving near-instant updates without constant polling.
 
 ## Development
 
 ```bash
 npm install -g homey
-cd "Refoss Homey App"
+cd com.refoss.monitor
 homey app run
 ```
-
-## EM01P Note
-
-The EM01P API is documented as "coming soon" by Refoss. This driver assumes the same
-`Em` component API as EM06P/EM16P with a single channel keyed `a`. Update `lib/RefossApi.js`
-if the actual API differs.

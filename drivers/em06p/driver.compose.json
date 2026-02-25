@@ -4,15 +4,16 @@
   },
   "class": "sensor",
   "capabilities": [
-    "measure_power",
-    "meter_power",
-    "meter_power.exported",
     "measure_voltage",
     "measure_current",
+    "measure_power",
     "measure_apparent_power",
     "measure_power_factor",
-    "meter_power_week",
     "meter_power_day",
+    "meter_power_week",
+    "meter_power",
+    "meter_power.exported",
+    "meter_cost_day",
     "measure_temperature"
   ],
   "capabilitiesOptions": {
@@ -74,20 +75,10 @@
   },
   "pair": [
     {
-      "id": "enter_ip",
-      "navigation": {
-        "next": "list_channels"
-      }
+      "id": "enter_ip"
     },
     {
-      "id": "list_channels",
-      "navigation": {
-        "next": "add_devices"
-      }
-    },
-    {
-      "id": "add_devices",
-      "template": "add_devices"
+      "id": "add_devices"
     }
   ],
   "settings": [
@@ -116,6 +107,41 @@
       "value": 10,
       "min": 5,
       "max": 300
+    },
+    {
+      "id": "electricity_price",
+      "type": "number",
+      "label": { "en": "Electricity Price (per kWh)" },
+      "hint": { "en": "Used to calculate daily cost on each circuit. Set to 0 to disable cost display." },
+      "value": 0,
+      "min": 0,
+      "max": 10,
+      "step": 0.001
+    },
+    {
+      "id": "currency",
+      "type": "dropdown",
+      "label": { "en": "Currency" },
+      "value": "EUR",
+      "values": [
+        { "id": "EUR", "label": { "en": "Euro (€)" } },
+        { "id": "USD", "label": { "en": "US Dollar ($)" } },
+        { "id": "GBP", "label": { "en": "British Pound (£)" } },
+        { "id": "AUD", "label": { "en": "Australian Dollar (A$)" } },
+        { "id": "CAD", "label": { "en": "Canadian Dollar (C$)" } },
+        { "id": "SEK", "label": { "en": "Swedish Krona (kr)" } },
+        { "id": "NOK", "label": { "en": "Norwegian Krone (kr)" } },
+        { "id": "DKK", "label": { "en": "Danish Krone (kr)" } },
+        { "id": "CHF", "label": { "en": "Swiss Franc (CHF)" } },
+        { "id": "JPY", "label": { "en": "Japanese Yen (¥)" } }
+      ]
+    },
+    {
+      "id": "include_in_widget",
+      "type": "checkbox",
+      "label": { "en": "Include In Energy Summary Widget" },
+      "hint": { "en": "If disabled, this device will be hidden from the Energy Summary widget." },
+      "value": true
     }
   ]
 }

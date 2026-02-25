@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--homey-font-family, system-ui, sans-serif);
+      color: var(--homey-text-color, #fff);
+      width: 100%;
+      height: 100%;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #title {
+      font-size: 11px;
+      opacity: 0.75;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #no-data {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0.6;
+      font-size: 12px;
+    }
+    #rows {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 2px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      align-items: baseline;
+    }
+    .name {
+      font-size: 12px;
+      opacity: 0.9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .energy {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .cost {
+      font-size: 12px;
+      opacity: 0.85;
+      white-space: nowrap;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="homey-widget">
+  <div id="title">Energy Summary</div>
+  <div id="no-data">No CT data available yet</div>
+  <div id="rows" class="hidden"></div>
+
+  <script>
+    let deviceId = null;
+    let period = 'day';
+    let refreshTimer = null;
+    let homey = null;
+
+    function fmtEnergy(v) {
+      if (v == null || !Number.isFinite(Number(v))) return '-';
+      return Number(v).toFixed(3) + ' kWh';
+    }
+
+    function fmtCost(v, symbol) {
+      if (v == null || !Number.isFinite(Number(v))) return '';
+      return String(symbol || 'EUR') + Number(v).toFixed(2);
+    }
+
+    function render(data) {
+      const rowsEl = document.getElementById('rows');
+      const noEl = document.getElementById('no-data');
+      rowsEl.innerHTML = '';
+
+      const symbol = data.currencySymbol || 'EUR';
+      const channels = Array.isArray(data.channels) ? data.channels : [];
+
+      if (channels.length === 0) {
+        noEl.classList.remove('hidden');
+        rowsEl.classList.add('hidden');
+        return;
+      }
+
+      for (const ch of channels) {
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = ch.name || 'Channel';
+
+        const energy = document.createElement('div');
+        energy.className = 'energy';
+        energy.textContent = fmtEnergy(ch.energy);
+
+        const cost = document.createElement('div');
+        cost.className = 'cost';
+        cost.textContent = fmtCost(ch.cost, symbol);
+
+        row.appendChild(name);
+        row.appendChild(energy);
+        row.appendChild(cost);
+        rowsEl.appendChild(row);
+      }
+
+      noEl.classList.add('hidden');
+      rowsEl.classList.remove('hidden');
+    }
+
+    async function refresh() {
+      try {
+        let path = '/energy?period=' + encodeURIComponent(period);
+        if (deviceId) path += '&deviceId=' + encodeURIComponent(deviceId);
+        const data = await homey.api('GET', path);
+        render(data);
+      } catch (err) {
+        console.error('Widget refresh error:', err);
+      }
+    }
+
+    async function init() {
+      const settings = await homey.getSettings();
+      period = (settings && settings.period) ? String(settings.period) : 'day';
+
+      const ids = homey.getDeviceIds();
+      if (ids && ids.length > 0) {
+        const first = ids[0];
+        deviceId = (typeof first === 'string') ? first : (first && first.id ? first.id : null);
+      } else {
+        deviceId = null;
+      }
+
+      await refresh();
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(refresh, 30000);
+    }
+
+    function onHomeyReady(Homey) {
+      homey = Homey;
+      homey.ready();
+      homey.on('settings', init);
+      init().catch((err) => console.error('Widget init error:', err));
+    }
+  </script>
+</body>
+</html>

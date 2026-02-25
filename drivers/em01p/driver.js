@@ -19,6 +19,12 @@ class Em01pDriver extends Homey.Driver {
     let deviceInfo = null;
     let customName = null;
 
+    session.setHandler('pair_log', async (payload) => {
+      const msg = payload && payload.message ? payload.message : String(payload || '');
+      this.log(`[PairUI] ${msg}`);
+      return true;
+    });
+
     session.setHandler('validate_ip', async (data) => {
       ipAddress  = (data.ip_address || '').trim();
       customName = (data.device_name || '').trim() || null;
@@ -49,6 +55,14 @@ class Em01pDriver extends Homey.Driver {
       const deviceName = customName
         || (deviceInfo && deviceInfo.name)
         || `Refoss EM01P (${ipAddress})`;
+
+      const existingMain = this.getDevices().find((device) => {
+        const existingMac = String((device.getData && device.getData().mac) || '').toUpperCase();
+        return existingMac && existingMac === macAddress;
+      });
+      if (existingMain) {
+        throw new Error('This Refoss EM01P is already added in Homey.');
+      }
 
       return [
         {

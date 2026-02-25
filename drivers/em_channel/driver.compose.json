@@ -4,15 +4,15 @@
   },
   "class": "sensor",
   "capabilities": [
-    "measure_power",
-    "meter_power",
-    "meter_power.exported",
     "measure_voltage",
     "measure_current",
+    "measure_power",
     "measure_apparent_power",
     "measure_power_factor",
+    "meter_power_day",
     "meter_power_week",
-    "meter_power_day"
+    "meter_power",
+    "meter_power.exported"
   ],
   "capabilitiesOptions": {
     "measure_power": {
@@ -102,6 +102,13 @@
       "type": "text",
       "label": { "en": "Channel Label" },
       "value": ""
+    },
+    {
+      "id": "include_in_widget",
+      "type": "checkbox",
+      "label": { "en": "Include In Energy Summary Widget" },
+      "hint": { "en": "If disabled, this device will be hidden from the Energy Summary widget." },
+      "value": true
     }
   ]
 }

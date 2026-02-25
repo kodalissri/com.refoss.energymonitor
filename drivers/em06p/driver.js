@@ -14,10 +14,10 @@ class Em06pDriver extends Homey.Driver {
     let username  = null;
     let password  = null;
     let deviceInfo = null;
-    let selectedChannels = RefossApi.EM06P_CHANNELS.map(ch => ({ ...ch, name: ch.label }));
 
     // Step 1: User enters IP (+ optional credentials), we validate by hitting the device
     session.setHandler('validate_ip', async (data) => {
+      this.log('Pair validate_ip called');
       ipAddress = (data.ip_address || '').trim();
       username  = (data.username || '').trim() || null;
       password  = data.password || null;
@@ -36,19 +36,9 @@ class Em06pDriver extends Homey.Driver {
       }
     });
 
-    // Step 2: User picks which channels (and names) to add
-    session.setHandler('set_selected_channels', async (data) => {
-      if (data && Array.isArray(data.channels) && data.channels.length > 0) {
-        selectedChannels = data.channels;
-      }
-      return { success: true };
-    });
-
-    // Step 3: Homey asks for the list of devices to add.
-    // We return ONLY the main aggregate device here.
-    // The em_channel sub-devices are created programmatically in onAdded()
-    // using the selectedChannels stored in the main device's store.
+    // Step 2: Homey asks for the list of devices to add.
     session.setHandler('list_devices', async () => {
+      this.log('Pair list_devices called');
       if (!ipAddress) throw new Error('IP address not set');
 
       const macAddress = (deviceInfo && deviceInfo.mac)
@@ -59,15 +49,15 @@ class Em06pDriver extends Homey.Driver {
         ? deviceInfo.name
         : `Refoss EM06P (${ipAddress})`;
 
-      // Normalise selectedChannels: accept both { channelId, label, name }
-      // (from list_channels.html) and { id, label, name } (from EM06P_CHANNELS default)
-      const normChannels = selectedChannels.map((ch) => ({
-        id:    ch.channelId != null ? ch.channelId : ch.id,
-        label: ch.label,
-        name:  ch.name || ch.label,
-      }));
+      const existingMain = this.getDevices().find((device) => {
+        const existingMac = String((device.getData && device.getData().mac) || '').toUpperCase();
+        return existingMac && existingMac === macAddress;
+      });
+      if (existingMain) {
+        throw new Error('This Refoss EM06P is already added in Homey.');
+      }
 
-      return [
+      const devices = [
         {
           name: baseName,
           data: {
@@ -75,8 +65,7 @@ class Em06pDriver extends Homey.Driver {
             mac: macAddress,
           },
           store: {
-            ip_address:        ipAddress,
-            selected_channels: JSON.stringify(normChannels),
+            ip_address: ipAddress,
           },
           settings: {
             ip_address:    ipAddress,
@@ -86,6 +75,35 @@ class Em06pDriver extends Homey.Driver {
           },
         },
       ];
+
+      for (const ch of RefossApi.EM06P_CHANNELS) {
+        devices.push({
+          name: ch.label,
+          driverId: 'em_channel',
+          driver_id: 'em_channel',
+          driverUri: 'homey:app:com.refoss.energymonitor',
+          data: {
+            id: `em06p-${macAddress}-ch${ch.id}`,
+            channelId: ch.id,
+            deviceMac: macAddress,
+            deviceModel: 'em06p',
+            mac: macAddress,
+          },
+          store: {
+            ip_address: ipAddress,
+          },
+          settings: {
+            ip_address: ipAddress,
+            poll_interval: 10,
+            channel_label: ch.label,
+            username: username || '',
+            password: password || '',
+          },
+        });
+      }
+
+      this.log(`Pair list_devices count: ${devices.length}`);
+      return devices;
     });
   }
 

@@ -1,0 +1,50 @@
+{
+  "name": {
+    "en": "Circuit Energy Summary"
+  },
+  "description": {
+    "en": "Shows today, this week and this month energy usage with cost for a Refoss circuit."
+  },
+  "images": {
+    "small": "/widgets/energy_summary/preview-light.png",
+    "large": "/widgets/energy_summary/preview-dark.png"
+  },
+  "size": {
+    "columns": 2,
+    "rows": 2
+  },
+  "settings": [
+    {
+      "id": "period",
+      "type": "dropdown",
+      "label": {
+        "en": "Period"
+      },
+      "value": "day",
+      "values": [
+        { "id": "day", "label": { "en": "Today" } },
+        { "id": "week", "label": { "en": "This Week" } },
+        { "id": "month", "label": { "en": "This Month" } }
+      ]
+    },
+    {
+      "id": "sort",
+      "type": "dropdown",
+      "label": {
+        "en": "Sort Order"
+      },
+      "value": "desc",
+      "values": [
+        { "id": "desc", "label": { "en": "Highest consumption first" } },
+        { "id": "asc",  "label": { "en": "Lowest consumption first" } },
+        { "id": "name", "label": { "en": "Alphabetical" } }
+      ]
+    }
+  ],
+  "api": {
+    "getEnergy": {
+      "method": "GET",
+      "path": "/energy"
+    }
+  }
+}

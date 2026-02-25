@@ -4,14 +4,14 @@
   },
   "class": "sensor",
   "capabilities": [
-    "measure_power",
-    "meter_power",
     "measure_voltage",
     "measure_current",
+    "measure_power",
     "measure_apparent_power",
     "measure_power_factor",
-    "meter_power_week",
     "meter_power_day",
+    "meter_power_week",
+    "meter_power",
     "measure_temperature"
   ],
   "capabilitiesOptions": {
@@ -64,14 +64,10 @@
   },
   "pair": [
     {
-      "id": "enter_ip",
-      "navigation": {
-        "next": "add_devices"
-      }
+      "id": "enter_ip"
     },
     {
-      "id": "add_devices",
-      "template": "add_devices"
+      "id": "add_devices"
     }
   ],
   "settings": [
@@ -100,6 +96,13 @@
       "value": 10,
       "min": 5,
       "max": 300
+    },
+    {
+      "id": "include_in_widget",
+      "type": "checkbox",
+      "label": { "en": "Include In Energy Summary Widget" },
+      "hint": { "en": "If disabled, this device will be hidden from the Energy Summary widget." },
+      "value": true
     }
   ]
 }

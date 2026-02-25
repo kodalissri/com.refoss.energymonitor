@@ -83,9 +83,13 @@
         username:   username || null,
         password:   password || null,
       })
-        .then(() => {
-          statusEl.textContent = 'Connected! Loading channels\u2026';
-          Homey.nextView();
+        .then(async () => {
+          const devices = await Homey.emit('list_devices');
+          if (!Array.isArray(devices) || devices.length === 0) {
+            throw new Error('No devices returned from pair session.');
+          }
+          statusEl.textContent = 'Connected!';
+          return Homey.nextView();
         })
         .catch((err) => {
           btn.disabled = false;

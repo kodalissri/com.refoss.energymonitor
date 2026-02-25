@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--homey-font-family, system-ui, sans-serif);
+      color: var(--homey-text-color);
+      background: transparent;
+      padding: var(--homey-su-4, 16px);
+      display: flex;
+      flex-direction: column;
+      gap: var(--homey-su-3, 12px);
+    }
+
+    #title {
+      font-size: var(--homey-font-size-small, 14px);
+      font-weight: var(--homey-font-weight-bold, 700);
+      color: var(--homey-text-color-blue, #3b82f6);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #no-data {
+      font-size: var(--homey-font-size-small, 14px);
+      color: var(--homey-text-color-light);
+      text-align: center;
+      padding: var(--homey-su-4, 16px) 0;
+    }
+
+    #rows {
+      display: flex;
+      flex-direction: column;
+      gap: var(--homey-su-2, 8px);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      column-gap: var(--homey-su-2, 8px);
+      align-items: baseline;
+      padding-bottom: var(--homey-su-2, 8px);
+      border-bottom: var(--homey-line-light, 1px solid rgba(128,128,128,0.15));
+    }
+
+    .row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .name {
+      font-size: var(--homey-font-size-small, 14px);
+      font-weight: var(--homey-font-weight-regular, 400);
+      color: var(--homey-text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .energy {
+      font-size: var(--homey-font-size-small, 14px);
+      font-weight: var(--homey-font-weight-bold, 700);
+      color: var(--homey-text-color);
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .cost {
+      font-size: var(--homey-font-size-small, 14px);
+      font-weight: var(--homey-font-weight-regular, 400);
+      color: var(--homey-text-color-green, #22c55e);
+      white-space: nowrap;
+      text-align: right;
+      min-width: 52px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="homey-widget">
+  <div id="title">Energy Summary</div>
+  <div id="no-data" class="hidden">No CT data available yet</div>
+  <div id="rows" class="hidden"></div>
+
+  <script type="text/javascript">
+    let deviceId = null;
+    let period = 'day';
+    let sort = 'desc';
+    let refreshTimer = null;
+    let homey = null;
+
+    function fmtEnergy(v) {
+      if (v == null || !Number.isFinite(Number(v))) return '—';
+      return Number(v).toFixed(3) + ' kWh';
+    }
+
+    function fmtCost(v, symbol) {
+      if (v == null || !Number.isFinite(Number(v)) || v === 0) return '';
+      return (symbol || '') + Number(v).toFixed(2);
+    }
+
+    function render(data) {
+      const rowsEl = document.getElementById('rows');
+      const noEl   = document.getElementById('no-data');
+      const titleEl = document.getElementById('title');
+
+      const label = data.periodLabel || 'Today';
+      titleEl.textContent = 'Energy — ' + label;
+
+      const symbol   = data.currencySymbol || '';
+      const channels = Array.isArray(data.channels) ? data.channels : [];
+
+      rowsEl.innerHTML = '';
+
+      if (channels.length === 0) {
+        noEl.classList.remove('hidden');
+        rowsEl.classList.add('hidden');
+        homey.ready({ height: document.body.scrollHeight });
+        return;
+      }
+
+      for (const ch of channels) {
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = ch.name || 'Channel';
+
+        const energy = document.createElement('div');
+        energy.className = 'energy';
+        energy.textContent = fmtEnergy(ch.energy);
+
+        const cost = document.createElement('div');
+        cost.className = 'cost';
+        cost.textContent = fmtCost(ch.cost, symbol);
+
+        row.appendChild(name);
+        row.appendChild(energy);
+        row.appendChild(cost);
+        rowsEl.appendChild(row);
+      }
+
+      noEl.classList.add('hidden');
+      rowsEl.classList.remove('hidden');
+
+      // Let the browser lay out, then report the exact rendered height
+      requestAnimationFrame(function() {
+        homey.ready({ height: document.body.scrollHeight });
+      });
+    }
+
+    async function refresh() {
+      try {
+        let path = '/energy?period=' + encodeURIComponent(period) + '&sort=' + encodeURIComponent(sort);
+        if (deviceId) path += '&deviceId=' + encodeURIComponent(deviceId);
+        const data = await homey.api('GET', path);
+        render(data);
+      } catch (err) {
+        console.error('Widget refresh error:', err);
+      }
+    }
+
+    async function init() {
+      const settings = await homey.getSettings();
+      period = (settings && settings.period) ? String(settings.period) : 'day';
+      sort   = (settings && settings.sort)   ? String(settings.sort)   : 'desc';
+
+      const ids = homey.getDeviceIds();
+      if (ids && ids.length > 0) {
+        const first = ids[0];
+        deviceId = (typeof first === 'string') ? first : (first && first.id ? first.id : null);
+      } else {
+        deviceId = null;
+      }
+
+      await refresh();
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(refresh, 30000);
+    }
+
+    function onHomeyReady(Homey) {
+      homey = Homey;
+      homey.on('settings', init);
+      init().catch(function(err) { console.error('Widget init error:', err); });
+    }
+  </script>
+</body>
+</html>

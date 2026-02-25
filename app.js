@@ -155,6 +155,9 @@ class RefossApp extends Homey.App {
 
   async _startWebhookServer() {
     this._webhookServer = http.createServer((req, res) => {
+      // Log ALL incoming requests so we can confirm the device is reaching us
+      this.log(`Webhook server: ${req.method} ${req.url} from ${req.socket.remoteAddress}`);
+
       // Only accept POSTs to /webhook/<mac>
       if (req.method !== 'POST' || !req.url.startsWith('/webhook/')) {
         res.writeHead(404);
@@ -163,6 +166,7 @@ class RefossApp extends Homey.App {
       }
 
       const mac = req.url.split('/webhook/')[1] || '';
+      this.log(`Webhook POST received from ${req.socket.remoteAddress} for mac=${mac}`);
 
       let body = '';
       req.on('data', (chunk) => { body += chunk; });
@@ -170,6 +174,8 @@ class RefossApp extends Homey.App {
         // Acknowledge immediately — device doesn't care about the response body
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end('{"ok":true}');
+
+        this.log(`Webhook body (${body.length} bytes): ${body.slice(0, 300)}`);
 
         // Parse the push body
         let parsed = null;
@@ -180,6 +186,7 @@ class RefossApp extends Homey.App {
         }
 
         if (parsed) {
+          this.log(`Webhook parsed OK: method=${parsed.method || 'unknown'} ch=${parsed.channelId} power=${parsed.power} voltage=${parsed.voltage}`);
           // Route to the parent device handler (for aggregate update)
           const deviceHandler = this._webhookHandlers.get(mac.toUpperCase());
           if (deviceHandler) deviceHandler(parsed);
@@ -188,6 +195,8 @@ class RefossApp extends Homey.App {
           const channelKey = `${mac.toUpperCase()}:${parsed.channelId}`;
           const channelHandler = this._webhookHandlers.get(channelKey);
           if (channelHandler) channelHandler(parsed);
+        } else {
+          this.log('Webhook body did not parse (missing params.em / params.emmerge)');
         }
       });
     });
@@ -232,14 +241,65 @@ class RefossApp extends Homey.App {
     this._webhookHandlers.delete(`${mac.toUpperCase()}:${channelId}`);
   }
 
+  dispatchChannelUpdate(mac, channelId, parsedData) {
+    const channelHandler = this._webhookHandlers.get(`${mac.toUpperCase()}:${channelId}`);
+    if (channelHandler) channelHandler(parsedData);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers to read electricity price and currency from the parent main device.
+  // ---------------------------------------------------------------------------
+
+  _getMainDevice(mac) {
+    const key = mac.toUpperCase();
+    // Only em16p and em06p have main (non-channel) devices with electricity_price
+    for (const driverId of ['em16p', 'em06p']) {
+      let driver;
+      try { driver = this.homey.drivers.getDriver(driverId); } catch (_) { continue; }
+      if (!driver) continue;
+      for (const device of driver.getDevices()) {
+        const data = device.getData();
+        if (data && (data.mac === key || data.id === key) && !data.channelId) {
+          return device;
+        }
+      }
+    }
+    return null;
+  }
+
+  getElectricityPrice(mac) {
+    const device = this._getMainDevice(mac);
+    if (!device) return 0;
+    const price = Number(device.getSetting('electricity_price'));
+    return Number.isFinite(price) ? price : 0;
+  }
+
+  getCurrencySymbol(mac) {
+    const SYMBOLS = {
+      EUR: '€', USD: '$', GBP: '£', AUD: 'A$', CAD: 'C$',
+      SEK: 'kr', NOK: 'kr', DKK: 'kr', CHF: 'CHF', JPY: '¥',
+    };
+    const device = this._getMainDevice(mac);
+    if (!device) return '€';
+    const currency = device.getSetting('currency') || 'EUR';
+    return SYMBOLS[currency] || currency;
+  }
+
   // ---------------------------------------------------------------------------
   // Returns the URL the Refoss device should POST to for this device's mac.
   // Homey Pro's local IP is obtained from this.homey.cloud.getLocalAddress().
   // ---------------------------------------------------------------------------
 
   async getWebhookUrl(mac) {
-    const localAddress = await this.homey.cloud.getLocalAddress();
-    return `http://${localAddress}:${WEBHOOK_PORT}/webhook/${mac.toUpperCase()}`;
+    const localAddressRaw = await this.homey.cloud.getLocalAddress();
+    const localAddress = String(localAddressRaw || '').trim();
+    // getLocalAddress may already include a port (e.g. "10.10.10.19:80").
+    // Strip scheme/port and keep only host so webhook URL is valid.
+    const host = localAddress
+      .replace(/^https?:\/\//i, '')
+      .replace(/\/.*$/, '')
+      .replace(/:\d+$/, '');
+    return `http://${host}:${WEBHOOK_PORT}/webhook/${mac.toUpperCase()}`;
   }
 
   get webhookPort() {

@@ -35,7 +35,10 @@ class Em01pDevice extends Homey.Device {
         this._onWebhookData(data).catch(err => this.error('Webhook handler error:', err.message));
       });
 
-      this._webhookId     = await this._api.registerHomeyWebhook(webhookUrl, emEvent);
+      const regResult = await this._api.registerHomeyWebhook(webhookUrl, emEvent, {
+        channelIds: RefossApi.EM01P_CHANNELS.map(ch => ch.id),
+      });
+      this._webhookId     = (regResult && regResult.id !== undefined) ? regResult.id : regResult;
       this._webhookActive = true;
       this.log(`Webhook registered (id=${this._webhookId}) for ${this.getName()}`);
       this._startPolling(FALLBACK_POLL_INTERVAL_MS);
@@ -138,15 +141,49 @@ class Em01pDevice extends Homey.Device {
   }
 
   async onSettings({ newSettings }) {
-    if (newSettings.ip_address && newSettings.ip_address !== this._ipAddress) {
+    let ipChanged = false;
+    let authChanged = false;
+    let pollChanged = false;
+
+    if (newSettings.ip_address !== undefined && newSettings.ip_address !== this._ipAddress) {
       this._ipAddress = newSettings.ip_address;
       await this.setStoreValue('ip_address', this._ipAddress);
+      ipChanged = true;
     }
-    if (newSettings.username !== undefined) this._username = newSettings.username || null;
-    if (newSettings.password !== undefined) this._password = newSettings.password || null;
-    this._api = new RefossApi(this._ipAddress, this._username, this._password);
-    if (newSettings.poll_interval)
-      this._pollInterval = Math.max(MIN_POLL_INTERVAL_S, newSettings.poll_interval) * 1000;
+    if (newSettings.username !== undefined) {
+      const nextUsername = newSettings.username || null;
+      if (nextUsername !== this._username) {
+        this._username = nextUsername;
+        authChanged = true;
+      }
+    }
+    if (newSettings.password !== undefined) {
+      const nextPassword = newSettings.password || null;
+      if (nextPassword !== this._password) {
+        this._password = nextPassword;
+        authChanged = true;
+      }
+    }
+    if (newSettings.poll_interval !== undefined) {
+      const nextPollInterval = Math.max(MIN_POLL_INTERVAL_S, newSettings.poll_interval) * 1000;
+      if (nextPollInterval !== this._pollInterval) {
+        this._pollInterval = nextPollInterval;
+        pollChanged = true;
+      }
+    }
+    if (ipChanged || authChanged) {
+      this._api = new RefossApi(this._ipAddress, this._username, this._password);
+    }
+
+    if (!ipChanged && !authChanged && !pollChanged) {
+      return;
+    }
+
+    if (!ipChanged && !authChanged && pollChanged) {
+      if (!this._webhookActive) this._startPolling(this._pollInterval);
+      return;
+    }
+
     await this._teardownWebhook();
     await this._setupWebhook();
   }

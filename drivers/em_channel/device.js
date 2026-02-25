@@ -72,6 +72,14 @@ class EmChannelDevice extends Homey.Device {
   // ---------------------------------------------------------------------------
 
   async _onWebhookData(data) {
+    if (data && data.power === 0) {
+      // Some webhook payloads report power=0 but omit apparent/current/pf.
+      // Force these to zero to avoid stale non-zero UI values.
+      if (data.apparentPower == null) data.apparentPower = 0;
+      if (data.current == null) data.current = 0;
+      if (data.pf == null) data.pf = 0;
+    }
+
     const updates = [];
     if (data.power           != null) updates.push(this._updateCapability('measure_power',           data.power));
     if (data.voltage         != null) updates.push(this._updateCapability('measure_voltage',         data.voltage));
@@ -79,9 +87,9 @@ class EmChannelDevice extends Homey.Device {
     if (data.monthEnergy     != null) updates.push(this._updateCapability('meter_power',             data.monthEnergy));
     if (data.apparentPower   != null) updates.push(this._updateCapability('measure_apparent_power',  data.apparentPower));
     if (data.pf              != null) updates.push(this._updateCapability('measure_power_factor',    data.pf));
-    if (data.weekEnergy      != null) updates.push(this._updateCapability('meter_power_week',     data.weekEnergy));
-    if (data.dayEnergy       != null) updates.push(this._updateCapability('meter_power_day',      data.dayEnergy));
-    if (data.monthRetEnergy  != null) updates.push(this._updateCapability('meter_power.exported', data.monthRetEnergy));
+    if (data.weekEnergy      != null) updates.push(this._updateCapability('meter_power_week',        data.weekEnergy));
+    if (data.dayEnergy       != null) updates.push(this._updateCapability('meter_power_day',         data.dayEnergy));
+    if (data.monthRetEnergy  != null) updates.push(this._updateCapability('meter_power.exported',    data.monthRetEnergy));
 
     await Promise.all(updates).catch(err => this.error('Capability update error:', err.message));
     if (!this.getAvailable()) await this.setAvailable().catch(() => {});
@@ -121,9 +129,9 @@ class EmChannelDevice extends Homey.Device {
       if (ch.monthEnergy     != null) updates.push(this._updateCapability('meter_power',             ch.monthEnergy));
       if (ch.apparentPower   != null) updates.push(this._updateCapability('measure_apparent_power',  ch.apparentPower));
       if (ch.pf              != null) updates.push(this._updateCapability('measure_power_factor',    ch.pf));
-      if (ch.weekEnergy     != null) updates.push(this._updateCapability('meter_power_week',     ch.weekEnergy));
-      if (ch.dayEnergy      != null) updates.push(this._updateCapability('meter_power_day',      ch.dayEnergy));
-      if (ch.monthRetEnergy != null) updates.push(this._updateCapability('meter_power.exported', ch.monthRetEnergy));
+      if (ch.weekEnergy      != null) updates.push(this._updateCapability('meter_power_week',        ch.weekEnergy));
+      if (ch.dayEnergy       != null) updates.push(this._updateCapability('meter_power_day',         ch.dayEnergy));
+      if (ch.monthRetEnergy  != null) updates.push(this._updateCapability('meter_power.exported',    ch.monthRetEnergy));
 
       await Promise.all(updates);
       if (!this.getAvailable()) await this.setAvailable();
@@ -135,13 +143,34 @@ class EmChannelDevice extends Homey.Device {
   }
 
   async onSettings({ newSettings }) {
-    if (newSettings.ip_address && newSettings.ip_address !== this._ipAddress)
+    let apiChanged = false;
+
+    if (newSettings.ip_address !== undefined && newSettings.ip_address !== this._ipAddress) {
       this._ipAddress = newSettings.ip_address;
-    if (newSettings.username !== undefined) this._username = newSettings.username || null;
-    if (newSettings.password !== undefined) this._password = newSettings.password || null;
-    this._api = new RefossApi(this._ipAddress, this._username, this._password);
-    if (newSettings.poll_interval)
+      apiChanged = true;
+    }
+    if (newSettings.username !== undefined) {
+      const nextUsername = newSettings.username || null;
+      if (nextUsername !== this._username) {
+        this._username = nextUsername;
+        apiChanged = true;
+      }
+    }
+    if (newSettings.password !== undefined) {
+      const nextPassword = newSettings.password || null;
+      if (nextPassword !== this._password) {
+        this._password = nextPassword;
+        apiChanged = true;
+      }
+    }
+    if (newSettings.poll_interval !== undefined) {
       this._pollInterval = Math.max(MIN_POLL_INTERVAL_S, newSettings.poll_interval) * 1000;
+    }
+
+    if (apiChanged) {
+      this._api = new RefossApi(this._ipAddress, this._username, this._password);
+    }
+
     this._startPolling(FALLBACK_POLL_INTERVAL_MS);
   }
 

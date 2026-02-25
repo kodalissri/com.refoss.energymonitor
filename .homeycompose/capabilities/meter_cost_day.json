@@ -1,0 +1,16 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Cost Today"
+  },
+  "units": {
+    "en": "€"
+  },
+  "decimals": 2,
+  "min": 0,
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "uiComponent": "sensor",
+  "uiQuickAction": false
+}
