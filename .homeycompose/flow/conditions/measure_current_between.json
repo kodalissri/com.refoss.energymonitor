@@ -17,14 +17,24 @@
       "type": "number",
       "min": 0,
       "step": 0.1,
-      "placeholder": { "en": "Min Amps" }
+      "placeholder": {
+        "en": "Min Amps"
+      },
+      "title": {
+        "en": "Minimum"
+      }
     },
     {
       "name": "high",
       "type": "number",
       "min": 0,
       "step": 0.1,
-      "placeholder": { "en": "Max Amps" }
+      "placeholder": {
+        "en": "Max Amps"
+      },
+      "title": {
+        "en": "Maximum"
+      }
     }
   ]
 }

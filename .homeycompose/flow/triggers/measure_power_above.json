@@ -17,14 +17,21 @@
       "type": "number",
       "min": 0,
       "step": 1,
-      "placeholder": { "en": "Watts" }
+      "placeholder": {
+        "en": "Watts"
+      },
+      "title": {
+        "en": "Value"
+      }
     }
   ],
   "tokens": [
     {
       "name": "power",
       "type": "number",
-      "title": { "en": "Power (W)" },
+      "title": {
+        "en": "Power (W)"
+      },
       "example": 1200
     }
   ]

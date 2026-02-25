@@ -17,14 +17,24 @@
       "type": "number",
       "min": 0,
       "step": 1,
-      "placeholder": { "en": "Min Volts" }
+      "placeholder": {
+        "en": "Min Volts"
+      },
+      "title": {
+        "en": "Minimum"
+      }
     },
     {
       "name": "high",
       "type": "number",
       "min": 0,
       "step": 1,
-      "placeholder": { "en": "Max Volts" }
+      "placeholder": {
+        "en": "Max Volts"
+      },
+      "title": {
+        "en": "Maximum"
+      }
     }
   ]
 }

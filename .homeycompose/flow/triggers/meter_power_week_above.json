@@ -17,15 +17,22 @@
       "type": "number",
       "min": 0,
       "step": 0.1,
-      "placeholder": { "en": "kWh" }
+      "placeholder": {
+        "en": "kWh"
+      },
+      "title": {
+        "en": "Value"
+      }
     }
   ],
   "tokens": [
     {
       "name": "energy",
       "type": "number",
-      "title": { "en": "Weekly Energy (kWh)" },
-      "example": 35.0
+      "title": {
+        "en": "Weekly Energy (kWh)"
+      },
+      "example": 35
     }
   ]
 }

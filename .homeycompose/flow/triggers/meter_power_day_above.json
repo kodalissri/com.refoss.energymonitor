@@ -17,14 +17,21 @@
       "type": "number",
       "min": 0,
       "step": 0.1,
-      "placeholder": { "en": "kWh" }
+      "placeholder": {
+        "en": "kWh"
+      },
+      "title": {
+        "en": "Value"
+      }
     }
   ],
   "tokens": [
     {
       "name": "energy",
       "type": "number",
-      "title": { "en": "Daily Energy (kWh)" },
+      "title": {
+        "en": "Daily Energy (kWh)"
+      },
       "example": 5.2
     }
   ]
