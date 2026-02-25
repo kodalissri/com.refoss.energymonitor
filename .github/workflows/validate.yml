@@ -26,8 +26,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Compose app
-        run: homey app compose
-
       - name: Validate app
         run: homey app validate

@@ -81,8 +81,6 @@ jobs:
             fs.writeFileSync('.homeycompose/app.json', JSON.stringify(a, null, 2) + '\n');
           "
 
-          homey app compose
-
       - name: Update CHANGELOG.md
         run: |
           NEW="${{ steps.ver.outputs.new }}"
