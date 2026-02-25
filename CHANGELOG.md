@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0 (2026-02-25)
+
+- Initial Update
+
+
 ## 1.0.0 (2026-02-24)
 
 ### Initial release
