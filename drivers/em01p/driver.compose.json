@@ -56,6 +56,10 @@
       "decimals": 3
     }
   },
+  "energy": {
+    "cumulative": true,
+    "cumulativeImportedCapability": "meter_power"
+  },
   "platforms": ["local"],
   "connectivity": ["lan"],
   "images": {

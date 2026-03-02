@@ -11,6 +11,7 @@ const MIN_POLL_INTERVAL_S       = 5;
 const POLL_RETRY_DELAY_MS       = 500;
 const POLL_MAX_CONSEC_FAILS     = 3;
 const POLL_JITTER_RATIO         = 0.10;
+const ENERGY_RESET_EPSILON_KWH  = 0.05;
 
 class Em06pDevice extends Homey.Device {
 
@@ -30,6 +31,7 @@ class Em06pDevice extends Homey.Device {
     this._consecutivePollFailures = 0;
     this._loggedFirstMainPoll = false;
     this._loggedFirstChannelUpdate = false;
+    this._cumulativeMeters = {};
 
     if (this._isChannelDevice) {
       if (this.hasCapability('measure_temperature')) {
@@ -156,6 +158,35 @@ class Em06pDevice extends Homey.Device {
     if (cap === 'meter_power_day')  app.triggerDayEnergy(this, newValue).catch(() => {});
   }
 
+  // Device reports month-based energy counters that reset each month.
+  // Homey's `meter_power` should be monotonic cumulative for weekly/monthly views.
+  _monthlyToCumulative(rawMonthlyValue, meterKey, capabilityId) {
+    if (rawMonthlyValue == null) return null;
+    const monthly = Number(rawMonthlyValue);
+    if (!Number.isFinite(monthly) || monthly < 0) return null;
+
+    let state = this._cumulativeMeters[meterKey];
+    if (!state) {
+      const existing = Number(this.getCapabilityValue(capabilityId));
+      const baseline = Number.isFinite(existing) ? Math.max(existing, monthly) : monthly;
+      state = { lastMonthly: monthly, cumulative: baseline };
+      this._cumulativeMeters[meterKey] = state;
+      return baseline;
+    }
+
+    let delta = 0;
+    if (monthly + ENERGY_RESET_EPSILON_KWH >= state.lastMonthly) {
+      delta = Math.max(0, monthly - state.lastMonthly);
+    } else {
+      // Counter reset (typically month boundary) -> continue from current month value.
+      delta = monthly;
+    }
+
+    state.lastMonthly = monthly;
+    state.cumulative += delta;
+    return Number(state.cumulative.toFixed(6));
+  }
+
   async _onWebhookData(data) {
     if (data && data.power === 0) {
       // Some webhook payloads report power=0 but omit apparent/current/pf.
@@ -174,12 +205,18 @@ class Em06pDevice extends Homey.Device {
     if (data.power           != null) updates.push(this._updateCapability('measure_power',          data.power));
     if (data.voltage         != null) updates.push(this._updateCapability('measure_voltage',        data.voltage));
     if (data.current         != null) updates.push(this._updateCapability('measure_current',        data.current));
-    if (data.monthEnergy     != null) updates.push(this._updateCapability('meter_power',            data.monthEnergy));
+    if (data.monthEnergy     != null) {
+      const cumulativeImported = this._monthlyToCumulative(data.monthEnergy, 'imported', 'meter_power');
+      if (cumulativeImported != null) updates.push(this._updateCapability('meter_power', cumulativeImported));
+    }
     if (data.apparentPower   != null) updates.push(this._updateCapability('measure_apparent_power', data.apparentPower));
     if (data.pf              != null) updates.push(this._updateCapability('measure_power_factor',   data.pf));
     if (data.weekEnergy      != null) updates.push(this._updateCapability('meter_power_week',       data.weekEnergy));
     if (data.dayEnergy       != null) updates.push(this._updateCapability('meter_power_day',        data.dayEnergy));
-    if (data.monthRetEnergy  != null) updates.push(this._updateCapability('meter_power.exported',   data.monthRetEnergy));
+    if (data.monthRetEnergy  != null) {
+      const cumulativeExported = this._monthlyToCumulative(data.monthRetEnergy, 'exported', 'meter_power.exported');
+      if (cumulativeExported != null) updates.push(this._updateCapability('meter_power.exported', cumulativeExported));
+    }
 
     if (data.dayEnergy != null) {
       const price = this.homey.app.getElectricityPrice(this._mac);
@@ -247,12 +284,18 @@ class Em06pDevice extends Homey.Device {
         if (ch.power          != null) updates.push(this._updateCapability('measure_power',          ch.power));
         if (ch.voltage        != null) updates.push(this._updateCapability('measure_voltage',        ch.voltage));
         if (ch.current        != null) updates.push(this._updateCapability('measure_current',        ch.current));
-        if (ch.monthEnergy    != null) updates.push(this._updateCapability('meter_power',            ch.monthEnergy));
+        if (ch.monthEnergy    != null) {
+          const cumulativeImported = this._monthlyToCumulative(ch.monthEnergy, 'imported', 'meter_power');
+          if (cumulativeImported != null) updates.push(this._updateCapability('meter_power', cumulativeImported));
+        }
         if (ch.apparentPower  != null) updates.push(this._updateCapability('measure_apparent_power', ch.apparentPower));
         if (ch.pf             != null) updates.push(this._updateCapability('measure_power_factor',   ch.pf));
         if (ch.weekEnergy     != null) updates.push(this._updateCapability('meter_power_week',       ch.weekEnergy));
         if (ch.dayEnergy      != null) updates.push(this._updateCapability('meter_power_day',        ch.dayEnergy));
-        if (ch.monthRetEnergy != null) updates.push(this._updateCapability('meter_power.exported',   ch.monthRetEnergy));
+        if (ch.monthRetEnergy != null) {
+          const cumulativeExported = this._monthlyToCumulative(ch.monthRetEnergy, 'exported', 'meter_power.exported');
+          if (cumulativeExported != null) updates.push(this._updateCapability('meter_power.exported', cumulativeExported));
+        }
 
         if (ch.dayEnergy != null) {
           const price = this.homey.app.getElectricityPrice(this._mac);
@@ -300,11 +343,17 @@ class Em06pDevice extends Homey.Device {
       if (hasPower)   updates.push(this._updateCapability('measure_power',          totalPower));
       if (hasCurrent) updates.push(this._updateCapability('measure_current',        totalCurrent));
       if (voltageCount > 0) updates.push(this._updateCapability('measure_voltage',  voltageSum / voltageCount));
-      if (hasEnergy)  updates.push(this._updateCapability('meter_power',           totalKwh));
+      if (hasEnergy) {
+        const cumulativeImported = this._monthlyToCumulative(totalKwh, 'imported', 'meter_power');
+        if (cumulativeImported != null) updates.push(this._updateCapability('meter_power', cumulativeImported));
+      }
       if (hasWeek)    updates.push(this._updateCapability('meter_power_week',       totalWkh));
       if (hasDay)     updates.push(this._updateCapability('meter_power_day',        totalDkh));
       if (hasVA)      updates.push(this._updateCapability('measure_apparent_power', totalVA));
-      if (hasREnergy) updates.push(this._updateCapability('meter_power.exported',   totalRKwh));
+      if (hasREnergy) {
+        const cumulativeExported = this._monthlyToCumulative(totalRKwh, 'exported', 'meter_power.exported');
+        if (cumulativeExported != null) updates.push(this._updateCapability('meter_power.exported', cumulativeExported));
+      }
       if (statusMap.temperature != null) updates.push(this._updateCapability('measure_temperature', statusMap.temperature));
 
       if (hasPower && hasVA && totalVA > 0) {

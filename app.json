@@ -979,6 +979,10 @@
           "decimals": 3
         }
       },
+      "energy": {
+        "cumulative": true,
+        "cumulativeImportedCapability": "meter_power"
+      },
       "platforms": [
         "local"
       ],
@@ -1651,6 +1655,7 @@
         }
       },
       "energy": {
+        "cumulative": true,
         "cumulativeImportedCapability": "meter_power",
         "cumulativeExportedCapability": "meter_power.exported"
       },
