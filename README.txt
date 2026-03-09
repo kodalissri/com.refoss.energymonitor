@@ -1,6 +1,3 @@
-Refoss Energy Monitor integrates Refoss energy monitoring devices (EM01P, EM06P, EM16P) with Homey Pro over your local network. No cloud account required.
-
-
 SUPPORTED DEVICES
 
 - EM01P — 1 channel, single CT transformer
