@@ -13,5 +13,8 @@
   },
   "2.0.5": {
     "en": "initial version fixes"
+  },
+  "2.0.6": {
+    "en": "Update widget previews to comply with Homey App Store guidelines"
   }
 }
