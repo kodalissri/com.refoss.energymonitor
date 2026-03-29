@@ -16,5 +16,8 @@
   },
   "2.0.6": {
     "en": "Update widget previews to comply with Homey App Store guidelines"
+  },
+  "2.0.7": {
+    "en": "Update support link to Homey Community forum topic"
   }
 }
