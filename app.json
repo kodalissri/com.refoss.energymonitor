@@ -1570,6 +1570,7 @@
         "measure_apparent_power",
         "measure_power_factor",
         "meter_power_day",
+        "meter_cost_day",
         "meter_power_week",
         "meter_power",
         "meter_power.exported"
@@ -1652,6 +1653,12 @@
             "en": "kWh"
           },
           "decimals": 3
+        },
+        "meter_cost_day": {
+          "title": {
+            "en": "Cost (Today)"
+          },
+          "decimals": 2
         }
       },
       "energy": {

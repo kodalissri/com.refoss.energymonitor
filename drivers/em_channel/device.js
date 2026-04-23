@@ -26,23 +26,6 @@ class EmChannelDevice extends Homey.Device {
     this._deviceMac  = this.getData().deviceMac || this.getData().mac;
     this._cumulativeMeters = {};
 
-    // Ensure modern capabilities are present (older paired devices may be missing them)
-    const capsToEnsure = [
-      'meter_power',
-      'meter_power.exported',
-      'meter_power_week',
-      'meter_power_day',
-      'meter_cost_day',
-    ];
-    for (const cap of capsToEnsure) {
-      if (!this.hasCapability(cap)) {
-        await this.addCapability(cap).catch(() => {});
-      }
-    }
-    if (this.hasCapability('measure_temperature')) {
-      await this.removeCapability('measure_temperature').catch(() => {});
-    }
-
     // Register with the app so the parent device's poll is routed here by channelId.
     // The parent calls app.dispatchChannelUpdate(mac, channelId, data) after every poll.
     this.homey.app.registerChannelHandler(this._deviceMac, this._channelId, (data) => {
