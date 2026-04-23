@@ -19,5 +19,8 @@
   },
   "2.0.7": {
     "en": "Update support link to Homey Community forum topic"
+  },
+  "2.0.8": {
+    "en": "fixing an issue causing homey advanced flows to slow down"
   }
 }
