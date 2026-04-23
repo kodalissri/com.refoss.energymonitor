@@ -22,5 +22,8 @@
   },
   "2.0.8": {
     "en": "fixing an issue causing homey advanced flows to slow down"
+  },
+  "2.0.9": {
+    "en": "Stabilize channel flow card registration"
   }
 }
