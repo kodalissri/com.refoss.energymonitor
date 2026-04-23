@@ -32,9 +32,14 @@ class Em06pDevice extends Homey.Device {
     this._loggedFirstMainPoll = false;
     this._loggedFirstChannelUpdate = false;
     this._cumulativeMeters = {};
+    this._channelKey = this._isChannelDevice ? `${String(this._mac || '').toUpperCase()}:${this._channelId}` : null;
 
     if (this._isChannelDevice) {
+      const capabilities = typeof this.getCapabilities === 'function' ? this.getCapabilities() : [];
+      this.log(`Em06p channel snapshot ${this._channelKey}: available=${this.getAvailable()} caps=${JSON.stringify(capabilities)}`);
+
       if (this.hasCapability('measure_temperature')) {
+        this.log(`Em06p channel ${this._channelKey} removeCapability measure_temperature`);
         await this.removeCapability('measure_temperature').catch(() => {});
       }
       const channelCapsToEnsure = [
@@ -46,6 +51,7 @@ class Em06pDevice extends Homey.Device {
       ];
       for (const cap of channelCapsToEnsure) {
         if (!this.hasCapability(cap)) {
+          this.log(`Em06p channel ${this._channelKey} addCapability ${cap}`);
           await this.addCapability(cap).catch(() => {});
         }
       }
@@ -221,8 +227,6 @@ class Em06pDevice extends Homey.Device {
     if (data.dayEnergy != null) {
       const price = this.homey.app.getElectricityPrice(this._mac);
       if (price > 0) {
-        const symbol = this.homey.app.getCurrencySymbol(this._mac);
-        await this.setCapabilityOptions('meter_cost_day', { units: symbol }).catch(() => {});
         updates.push(this._updateCapability('meter_cost_day', data.dayEnergy * price));
       }
     }
@@ -232,7 +236,10 @@ class Em06pDevice extends Homey.Device {
       this._loggedFirstChannelUpdate = true;
       this.log(`First channel update received for ch${this._channelId} (power=${data.power}, month=${data.monthEnergy}, week=${data.weekEnergy}, day=${data.dayEnergy}, voltage=${data.voltage}, current=${data.current})`);
     }
-    if (!this.getAvailable()) await this.setAvailable().catch(() => {});
+    if (!this.getAvailable()) {
+      this.log(`Em06p channel ${this._channelKey} restoring availability after webhook data`);
+      await this.setAvailable().catch(() => {});
+    }
   }
 
   _startPolling(intervalMs) {
@@ -300,14 +307,15 @@ class Em06pDevice extends Homey.Device {
         if (ch.dayEnergy != null) {
           const price = this.homey.app.getElectricityPrice(this._mac);
           if (price > 0) {
-            const symbol = this.homey.app.getCurrencySymbol(this._mac);
-            await this.setCapabilityOptions('meter_cost_day', { units: symbol }).catch(() => {});
             updates.push(this._updateCapability('meter_cost_day', ch.dayEnergy * price));
           }
         }
 
         await Promise.all(updates);
-        if (!this.getAvailable()) await this.setAvailable();
+        if (!this.getAvailable()) {
+          this.log(`Em06p channel ${this._channelKey} restoring availability after poll`);
+          await this.setAvailable();
+        }
         return;
       }
 

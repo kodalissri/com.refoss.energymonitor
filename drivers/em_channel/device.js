@@ -25,6 +25,12 @@ class EmChannelDevice extends Homey.Device {
     this._channelId  = this.getData().channelId;
     this._deviceMac  = this.getData().deviceMac || this.getData().mac;
     this._cumulativeMeters = {};
+    this._loggedFirstChannelUpdate = false;
+    this._lastCostUnit = null;
+    this._channelKey = `${String(this._deviceMac || '').toUpperCase()}:${this._channelId}`;
+
+    const capabilities = typeof this.getCapabilities === 'function' ? this.getCapabilities() : [];
+    this.log(`EmChannelDevice snapshot ${this._channelKey}: available=${this.getAvailable()} caps=${JSON.stringify(capabilities)}`);
 
     // Register with the app so the parent device's poll is routed here by channelId.
     // The parent calls app.dispatchChannelUpdate(mac, channelId, data) after every poll.
@@ -69,13 +75,24 @@ class EmChannelDevice extends Homey.Device {
       const price = this.homey.app.getElectricityPrice(this._deviceMac);
       if (price > 0) {
         const symbol = this.homey.app.getCurrencySymbol(this._deviceMac);
+        if (symbol !== this._lastCostUnit) {
+          this.log(`EmChannelDevice ${this._channelKey} setCapabilityOptions meter_cost_day units=${symbol}`);
+          this._lastCostUnit = symbol;
+        }
         await this.setCapabilityOptions('meter_cost_day', { units: symbol }).catch(() => {});
         updates.push(this._updateCapability('meter_cost_day', data.dayEnergy * price));
       }
     }
 
     await Promise.all(updates).catch(err => this.error('Capability update error:', err.message));
-    if (!this.getAvailable()) await this.setAvailable().catch(() => {});
+    if (!this._loggedFirstChannelUpdate) {
+      this._loggedFirstChannelUpdate = true;
+      this.log(`EmChannelDevice first data ${this._channelKey}: power=${data && data.power} voltage=${data && data.voltage} current=${data && data.current} day=${data && data.dayEnergy} month=${data && data.monthEnergy}`);
+    }
+    if (!this.getAvailable()) {
+      this.log(`EmChannelDevice ${this._channelKey} restoring availability after data update`);
+      await this.setAvailable().catch(() => {});
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -83,7 +100,11 @@ class EmChannelDevice extends Homey.Device {
   // ---------------------------------------------------------------------------
 
   async _updateCapability(cap, newValue) {
-    if (newValue == null || !this.hasCapability(cap)) return;
+    if (newValue == null) return;
+    if (!this.hasCapability(cap)) {
+      this.log(`EmChannelDevice ${this._channelKey} missing capability ${cap}; skipping value=${newValue}`);
+      return;
+    }
     const oldValue = this.getCapabilityValue(cap);
     await this.setCapabilityValue(cap, newValue);
 
@@ -127,7 +148,7 @@ class EmChannelDevice extends Homey.Device {
   }
 
   async onDeleted() {
-    this.log(`EmChannelDevice ch${this._channelId} deleted`);
+    this.log(`EmChannelDevice ch${this._channelId} deleted (key=${this._channelKey})`);
     this.homey.app.unregisterChannelHandler(this._deviceMac, this._channelId);
   }
 

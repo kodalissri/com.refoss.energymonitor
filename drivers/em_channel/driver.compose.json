@@ -2,6 +2,7 @@
   "name": {
     "en": "Refoss Channel"
   },
+  "deprecated": true,
   "class": "sensor",
   "capabilities": [
     "measure_voltage",

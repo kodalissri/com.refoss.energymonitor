@@ -16,6 +16,7 @@ class RefossApp extends Homey.App {
 
     // Map of deviceMac -> callback function, registered by device instances
     this._webhookHandlers = new Map();
+    this._channelDispatchCounts = new Map();
 
     await this._startWebhookServer();
     this._registerFlowCards();
@@ -219,13 +220,16 @@ class RefossApp extends Homey.App {
   // ---------------------------------------------------------------------------
 
   registerWebhookHandler(mac, handler) {
-    this._webhookHandlers.set(mac.toUpperCase(), handler);
-    this.log(`Webhook handler registered for device ${mac}`);
+    const key = mac.toUpperCase();
+    const replaced = this._webhookHandlers.has(key);
+    this._webhookHandlers.set(key, handler);
+    this.log(`Webhook handler registered for device ${mac} (replaced=${replaced}, total_handlers=${this._webhookHandlers.size})`);
   }
 
   unregisterWebhookHandler(mac) {
-    this._webhookHandlers.delete(mac.toUpperCase());
-    this.log(`Webhook handler unregistered for device ${mac}`);
+    const key = mac.toUpperCase();
+    const existed = this._webhookHandlers.delete(key);
+    this.log(`Webhook handler unregistered for device ${mac} (existed=${existed}, total_handlers=${this._webhookHandlers.size})`);
   }
 
   // ---------------------------------------------------------------------------
@@ -234,15 +238,27 @@ class RefossApp extends Homey.App {
   // ---------------------------------------------------------------------------
 
   registerChannelHandler(mac, channelId, handler) {
-    this._webhookHandlers.set(`${mac.toUpperCase()}:${channelId}`, handler);
+    const key = `${mac.toUpperCase()}:${channelId}`;
+    const replaced = this._webhookHandlers.has(key);
+    this._webhookHandlers.set(key, handler);
+    this.log(`Channel handler registered for ${key} (replaced=${replaced}, total_handlers=${this._webhookHandlers.size})`);
   }
 
   unregisterChannelHandler(mac, channelId) {
-    this._webhookHandlers.delete(`${mac.toUpperCase()}:${channelId}`);
+    const key = `${mac.toUpperCase()}:${channelId}`;
+    const existed = this._webhookHandlers.delete(key);
+    this._channelDispatchCounts.delete(key);
+    this.log(`Channel handler unregistered for ${key} (existed=${existed}, total_handlers=${this._webhookHandlers.size})`);
   }
 
   dispatchChannelUpdate(mac, channelId, parsedData) {
-    const channelHandler = this._webhookHandlers.get(`${mac.toUpperCase()}:${channelId}`);
+    const key = `${mac.toUpperCase()}:${channelId}`;
+    const nextCount = (this._channelDispatchCounts.get(key) || 0) + 1;
+    this._channelDispatchCounts.set(key, nextCount);
+    if (nextCount <= 3 || nextCount % 60 === 0) {
+      this.log(`Dispatch channel update ${key} (#${nextCount}, power=${parsedData && parsedData.power}, day=${parsedData && parsedData.dayEnergy}, month=${parsedData && parsedData.monthEnergy})`);
+    }
+    const channelHandler = this._webhookHandlers.get(key);
     if (channelHandler) channelHandler(parsedData);
   }
 
